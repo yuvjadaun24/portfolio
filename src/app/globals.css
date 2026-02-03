@@ -1,0 +1,393 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+:root {
+  --background: #05070a;
+  --foreground: #e8eef6;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: linear-gradient(135deg, rgba(225, 225, 225, 0.92) 0%, rgba(255, 255, 255, 0.88) 100%);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, Segoe UI, Roboto,
+    Arial, sans-serif;
+}
+
+@layer utilities {
+  @keyframes eq {
+    0% {
+      transform: scaleY(0.35);
+    }
+
+    50% {
+      transform: scaleY(1);
+    }
+
+    100% {
+      transform: scaleY(0.45);
+    }
+  }
+
+  @keyframes dvd-glow {
+    0% {
+      opacity: 0;
+      filter: blur(10px);
+    }
+
+    22% {
+      opacity: 0.55;
+      filter: blur(6px);
+    }
+
+    100% {
+      opacity: 0;
+      filter: blur(14px);
+    }
+  }
+
+  @keyframes dvd-hit {
+    0% {
+      transform: translateZ(0) scale(1);
+      filter: brightness(1) saturate(1);
+    }
+
+    25% {
+      transform: translateZ(0) scale(1.02);
+      filter: brightness(1.35) saturate(1.4);
+    }
+
+    100% {
+      transform: translateZ(0) scale(1);
+      filter: brightness(1) saturate(1);
+    }
+  }
+
+  @keyframes dvd-prompt {
+    0% {
+      opacity: 0.35;
+    }
+
+    55% {
+      opacity: 0.75;
+    }
+
+    100% {
+      opacity: 0.35;
+    }
+  }
+
+  @keyframes crt-flicker {
+    0% {
+      opacity: 0;
+      filter: brightness(1) contrast(1);
+    }
+
+    18% {
+      opacity: 0.18;
+      filter: brightness(1.6) contrast(1.25);
+    }
+
+    45% {
+      opacity: 0.06;
+      filter: brightness(1.25) contrast(1.1);
+    }
+
+    100% {
+      opacity: 0;
+      filter: brightness(1) contrast(1);
+    }
+  }
+
+  /* ===== CRT MONITOR EFFECT STYLES ===== */
+  /* Production-ready CRT screen styling with authentic retro effects */
+
+  /**
+   * CRT Bezel: Outer monitor casing
+   * - Dark plastic finish with subtle texture
+   * - Rounded corners (28px radius) for TV bezel shape
+   * - Shadow creates depth and separation from background
+   */
+  .crt-bezel {
+    /* Handled via Tailwind classes, but if needed in CSS: */
+  }
+
+  /**
+   * CRT Screen Wrapper: Main container for screen and overlays
+   * - Holds 4:3 aspect ratio content
+   * - Rounded inner corners (18px) for screen glass edges
+   * - Overflow hidden ensures overlays don't leak
+   * - Perspective + 3D transforms create convex glass illusion
+   * - Core depth effect for authentic CRT curved appearance
+   */
+  .crt-screen {
+    perspective: 1200px;
+    transform-style: preserve-3d;
+    overflow: hidden;
+    border-radius: 55px;
+
+    /* 3D Perspective + Barrel Distortion: Creates strong magnification at center */
+    transform:
+      perspective(1200px) rotateX(2deg) scale(1.08);
+
+    /* Inset shadow for depth and inner edge definition */
+    box-shadow:
+      inset 0 0 60px rgba(0, 0, 0, 0.6),
+      inset 0 0 30px rgba(100, 200, 255, 0.15);
+  }
+
+  /**
+   * Convex Glass Warp (Pseudo-element): THE SECRET SAUCE
+   * This is what makes the screen look like curved glass
+   * - Center glass reflection with bright highlight
+   * - Radial gradient from center to edges
+   * - Edge compression illusion (optically pushes edges back)
+   * - Convex highlight bloom effect
+   */
+  .crt-screen::before {
+    content: "";
+    position: absolute;
+    inset: -10%;
+    pointer-events: none;
+    z-index: 25;
+
+    background: radial-gradient(circle at center,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(0, 0, 0, 0.2) 55%,
+        rgba(0, 0, 0, 0.5) 100%);
+
+    mix-blend-mode: overlay;
+  }
+
+  .crt-screen-wrapper {
+    perspective: 1200px;
+    transform-style: preserve-3d;
+    /* Optional: subtle barrel distortion via backdrop filter */
+    backdrop-filter: blur(0.02px);
+  }
+
+  /**
+   * CRT Screen Background: The glowing phosphor base
+   * - Gradient from dark blue-ish (top) to pure black (bottom)
+   * - Simulates the dark envelope of a CRT tube
+   * - Creates depth perception
+   */
+  .crt-screen-bg {
+    /* Handled via Tailwind: bg-linear-to-b from-[#0b1220] to-black */
+  }
+
+  /**
+   * CRT Content Layer: Your actual UI
+   * - Sits above background, below overlay effects
+   * - Scale(1.02) enlarges center content
+   * - Filter blur(0.15px) softens edges for barrel effect illusion
+   * - Creates subtle barrel distortion and reduced digital sharpness
+   */
+  .crt-content {
+    transform: scale(1.02);
+    filter: blur(0.15px);
+    /* Ensures content stays interactive while overlays don't */
+  }
+
+  /* ===== OVERLAY EFFECTS (All layered as non-interactive) ===== */
+
+  /**
+   * CRT Flicker Pulse: Simulates sudden scan artifacts / electrical anomaly
+   * - Bright center glow (like a momentary surge)
+   * - Fast 160ms animation for authenticity
+   * - Screen blend mode makes it additive (bright flare effect)
+   * - Triggered via key prop change (flickerPulse)
+   *
+   * Animation keyframes:
+   *   0%: invisible
+   *   18%: peak brightness (1.6x) and contrast, centered glow
+   *   45%: still visible but dimming
+   *   100%: faded out
+   */
+  .crt-flicker {
+    background: radial-gradient(ellipse at center,
+        rgba(255, 255, 255, 0.35) 0%,
+        rgba(255, 255, 255, 0.05) 35%,
+        rgba(0, 0, 0, 0) 70%);
+    animation: crt-flicker 160ms ease-in-out 1;
+    mix-blend-mode: screen;
+  }
+
+  /**
+   * Phosphor Dot Matrix: Simulates CRT pixel grid
+   * - Tiny black dots (3px × 3px grid) with 0.9px radius
+   * - Creates the "scanned line" pattern visible on CRTs
+   * - Radial gradient at 1px, 1px offset creates dot pattern
+   * - Multiply blend mode darkens content subtly
+   * - Opacity 0.34 keeps effect realistic (not overwhelming)
+   *
+   * Real-world effect:
+   * Old CRT monitors had visible phosphor dots due to the electron beam
+   * scanning in a grid. This layer recreates that visual texture.
+   */
+  .crt-overlay-dots {
+    opacity: 0.34;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.85) 0.9px, rgba(0, 0, 0, 0) 1.2px);
+    background-size: 3px 3px;
+    mix-blend-mode: multiply;
+  }
+
+  /**
+   * RGB Subpixel Stripes: Simulates color separation found on LCD/CRT screens
+   * - Repeating 1px red, 1px green, 1px blue vertical lines
+   * - Opacity varies per channel (R: 0.16, G: 0.12, B: 0.16) to match actual color response
+   * - Overlay blend mode creates subtle color interaction
+   * - Opacity 0.22 prevents obvious color banding
+   *
+   * Real-world effect:
+   * LCD and some CRT displays have separate red, green, blue phosphor elements.
+   * When you look closely, you can see the color stripes. This layer adds that effect.
+   */
+  .crt-overlay-rgb {
+    opacity: 0.22;
+    background-image: repeating-linear-gradient(90deg,
+        rgba(255, 30, 30, 0.16) 0px,
+        rgba(255, 30, 30, 0.16) 1px,
+        rgba(30, 255, 70, 0.12) 1px,
+        rgba(30, 255, 70, 0.12) 2px,
+        rgba(80, 140, 255, 0.16) 2px,
+        rgba(80, 140, 255, 0.16) 3px);
+    background-size: 3px 100%;
+    mix-blend-mode: overlay;
+  }
+
+  /**
+   * Horizontal Scanlines: The iconic CRT line pattern
+   * - 1px bright lines on 4px vertical spacing (25% fill)
+   * - Repeats continuously top to bottom
+   * - Soft-light blend mode for natural darkening (not harsh black)
+   * - Opacity 0.14 keeps lines visible but subtle
+   *
+   * Real-world effect:
+   * CRTs refresh by scanning horizontal lines top-to-bottom 50-60 times per second.
+   * Each line corresponds to one electron beam sweep. Modern displays rarely
+   * show this, making it a strong retro identifier.
+   *
+   * Optional: Could add subtle animation here for a "flowing" scanline effect:
+   *   animation: scanline-scroll 8s linear infinite;
+   */
+  .crt-overlay-scanlines {
+    opacity: 0.14;
+    background: repeating-linear-gradient(to bottom,
+        rgba(255, 255, 255, 0.22) 0px,
+        rgba(255, 255, 255, 0.22) 1px,
+        rgba(0, 0, 0, 0) 2px,
+        rgba(0, 0, 0, 0) 6px);
+    mix-blend-mode: soft-light;
+  }
+
+  /**
+   * Corner Compression Mask: Lens bending effect for convex glass illusion
+   * - Four radial gradients at each corner
+   * - Creates optical illusion: center appears closer, edges appear farther
+   * - Mimics convex lens compression of curved CRT glass
+   * - Essential for 3D barrel distortion perception
+   * - Without this, the convex illusion fails visually
+   *
+   * Real-world effect:
+   * CRT tubes have curved glass. Looking at a convex lens makes the center
+   * appear magnified/closer and edges appear compressed/pushed back.
+   * This mask recreates that optical behavior.
+   */
+  .crt-lens-mask {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at top left, rgba(0, 0, 0, 0.35), transparent 60%),
+      radial-gradient(circle at top right, rgba(0, 0, 0, 0.35), transparent 60%),
+      radial-gradient(circle at bottom left, rgba(0, 0, 0, 0.35), transparent 60%),
+      radial-gradient(circle at bottom right, rgba(0, 0, 0, 0.35), transparent 60%);
+  }
+
+  /**
+   * Dark Vignette: Edges fade to darkness
+   * - Radial gradient: transparent center → black edges
+   * - Creates "tunnel vision" effect looking into a screen
+   * - 55% center → 100% full black (adjusted for convex effect)
+   * - Multiply blend mode to darken edges naturally
+   * - Opacity 0.85 creates strong edge darkening
+   * - Works with lens mask for enhanced convex illusion
+   *
+   * Real-world effect:
+   * CRT tubes are naturally brighter in the center due to electron beam focus.
+   * Edges appear darker (vignetting). Also simulates depth: the screen appears
+   * to curve away from you at the edges (barrel distortion).
+   * Combined with lens mask: creates authentic 3D curved glass appearance.
+   */
+  .crt-overlay-vignette {
+    opacity: 0.85;
+    background:
+      radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.6) 100%);
+    mix-blend-mode: multiply;
+  }
+
+  /**
+   * Glass Reflection: Curved glass panel gloss and light reflection
+   * - Linear gradient from top (bright) to middle (fading)
+   * - Simulates light hitting a curved glass surface
+   * - Screen blend mode makes it additive (adds light, not shadows)
+   * - Opacity 0.14 keeps it subtle and realistic
+   *
+   * Real-world effect:
+   * CRT monitors have a glossy curved glass screen. When light hits the
+   * screen at an angle, you see a reflection. This layer adds that gloss
+   * highlight, making the screen feel three-dimensional.
+   */
+  .crt-overlay-glass {
+    opacity: 0.14;
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.06) 18%,
+        rgba(255, 255, 255, 0) 52%);
+    mix-blend-mode: screen;
+  }
+
+  .dvd-glow {
+    animation: dvd-glow 140ms ease-out 1;
+    mix-blend-mode: screen;
+  }
+
+  .dvd-hit {
+    animation: dvd-hit 140ms ease-out 1;
+  }
+
+  .dvd-prompt {
+    animation: dvd-prompt 1400ms ease-in-out infinite;
+  }
+
+  /* DVD Loader styling - overlays only show on CRT screen, not background */
+  .dvd-loader-crt-only {
+    /* These overlays are contained within the loader's black container */
+    /* They will only be visible on the actual CRT display */
+  }
+
+  /* Loader background GIF style */
+  .loader-bg-gif {
+    background-image: url('/loader-bg.gif');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat !important;
+    background-color: transparent !important;
+    opacity: 0.2;
+  }
+}
