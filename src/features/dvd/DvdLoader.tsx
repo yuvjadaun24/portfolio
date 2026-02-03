@@ -156,7 +156,7 @@ export function DvdLoader({ onDone, onCornerHit }: Props) {
         window.addEventListener("keydown", onKeyDown, { once: true });
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [onDone]);
-
+//////////return 
     return (
         <div ref={ref} className="relative h-full w-full bg-black overflow-hidden">
             {/* CRT-ish overlays - Only on CRT screen, not background */}
