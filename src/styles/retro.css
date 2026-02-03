@@ -1,0 +1,269 @@
+/* Retro DVD Player Styles */
+
+/* Scanline effect for authenticity */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.scanline-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* CRT screen curvature effect */
+.crt-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.crt-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Retro glow effect for buttons */
+.retro-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+               0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* DVD background animation */
+@keyframes ripple {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1) translateY(-10px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 0.3;
+  }
+}
+
+.dvd-ripple {
+  animation: ripple 4s ease-in-out infinite;
+}
+
+/* Liquid wave effect */
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0) scaleX(1);
+  }
+  25% {
+    transform: translateY(-10px) scaleX(1.05);
+  }
+  50% {
+    transform: translateY(-5px) scaleX(0.98);
+  }
+  75% {
+    transform: translateY(-15px) scaleX(1.02);
+  }
+}
+
+.liquid-wave {
+  animation: wave 8s ease-in-out infinite;
+}
+
+/* Pixel perfect rendering for retro icons */
+.pixel-perfect {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ============================
+   CRT / Lo‑Fi 2005 TV Overlays
+   ============================ */
+
+@keyframes crt-flicker {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.84;
+  }
+}
+
+@keyframes crt-noise {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  10% {
+    transform: translate3d(-1%, 1%, 0);
+  }
+  20% {
+    transform: translate3d(-2%, -1%, 0);
+  }
+  30% {
+    transform: translate3d(1%, 1%, 0);
+  }
+  40% {
+    transform: translate3d(2%, -2%, 0);
+  }
+  50% {
+    transform: translate3d(-1%, -2%, 0);
+  }
+  60% {
+    transform: translate3d(2%, 1%, 0);
+  }
+  70% {
+    transform: translate3d(-2%, 2%, 0);
+  }
+  80% {
+    transform: translate3d(1%, -1%, 0);
+  }
+  90% {
+    transform: translate3d(-1%, 2%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes crt-rgb-jitter {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(0.35px);
+  }
+}
+
+/* Scanlines: make pattern coarser so it reads at normal zoom */
+.crt-scanlines {
+  opacity: 0.26;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.28) 0px,
+      rgba(0, 0, 0, 0.28) 1px,
+      rgba(0, 0, 0, 0.00) 1px,
+      rgba(0,  0, 0, 0.00) 3px
+    );
+  animation: crt-flicker 0.16s infinite;
+  mix-blend-mode: multiply;
+}
+
+/* A second, slower banding layer to mimic field refresh */
+.crt-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.08) 0px,
+      rgba(255, 255, 255, 0.08) 1px,
+      rgba(0, 0, 0, 0) 5px,
+      rgba(0, 0, 0, 0) 7px
+    );
+  animation: scanline 9s linear infinite;
+}
+
+/* Animated monochrome noise: larger grain + slightly higher opacity */
+.crt-noise {
+  opacity: 0.12;
+  background:
+    repeating-radial-gradient(circle at 10% 10%, rgba(255,255,255,0.14) 0 1.6px, rgba(0,0,0,0.14) 1.6px 3.2px),
+    repeating-radial-gradient(circle at 70% 40%, rgba(0,0,0,0.12) 0 1.6px, rgba(255,255,255,0.12) 1.6px 3.2px);
+  mix-blend-mode: overlay;
+  filter: contrast(130%) grayscale(100%);
+  animation: crt-noise 0.42s steps(2, end) infinite;
+}
+
+/* RGB split overlay: stronger bleed */
+.crt-rgb {
+  opacity: 0.26;
+  mix-blend-mode: screen;
+  background:
+    linear-gradient(90deg, rgba(255, 0, 0, 0.10), rgba(255, 0, 0, 0.10)),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.09), rgba(0, 255, 255, 0.09));
+  background-size: 100% 100%, 100% 100%;
+  background-position: 0 0, 0 0;
+  filter: blur(0.55px);
+  animation: crt-rgb-jitter 0.22s infinite;
+}
+
+/* Heavier vignette so it reads */
+.crt-vignette {
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.0) 28%,
+      rgba(0, 0, 0, 0.26) 68%,
+      rgba(0, 0, 0, 0.48) 100%
+    );
+  mix-blend-mode: multiply;
+}
+
+/* Curvature: tiny bit more punch */
+.crt-curvature {
+  transform: scale(1.02);
+  transform-origin: center;
+  filter: contrast(1.02) saturate(1.06);
+}
+
+.crt-curvature::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.0) 40%),
+    radial-gradient(ellipse at top left, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 55%),
+    radial-gradient(ellipse at top right, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 55%),
+    radial-gradient(ellipse at bottom left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 60%),
+    radial-gradient(ellipse at bottom right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 60%);
+  mix-blend-mode: multiply;
+}
+
+/* ============================
+   Text degradation helpers
+   ============================ */
+
+/* Apply to containers if needed (we also target common text elements globally below) */
+.crt-text {
+  filter: blur(0.5px);
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.20),
+    0.6px 0 0 rgba(255, 60, 60, 0.22),
+    -0.6px 0 0 rgba(80, 180, 255, 0.22);
+}
+
+/* Make most UI text feel slightly soft + phosphor-y */
+:where(p, span, h1, h2, h3, h4, button, label, a, li, div) {
+  text-rendering: geometricPrecision;
+}
+
+/* Only blur text-ish nodes (avoid blurring layout-heavy containers too much) */
+:where(h1, h2, h3, h4, p, span, label, a, button) {
+  filter: blur(0.45px);
+  text-shadow:
+    0 0 9px rgba(255, 255, 255, 0.18),
+    0.8px 0 0 rgba(255, 60, 60, 0.20),
+    -0.8px 0 0 rgba(80, 180, 255, 0.20);
+}

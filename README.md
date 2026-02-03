@@ -1,35 +1,11 @@
-# Retro DVD Portfolio
 
-## Concept (Step 0)
+  # Personal Portfolio Website
 
-**Core idea:** a portfolio that behaves like a retro DVD player UI (keyboard-first), with a CRT TV frame and a 4:3 “screen” in the center.
+  This is a code bundle for Personal Portfolio Website. The original project is available at https://www.figma.com/design/XGgH7ISRYCgPF6OVjJL0QS/Personal-Portfolio-Website.
 
-**Style direction**
-- DVD player style: **generic / brandless** (professional + timeless)
-- Aspect ratio: **4:3** (hard constraint)
-- Navigation: **keyboard-first** (arrow keys + Enter/Escape)
-- Tone: **retro but professional** (fun presentation, serious content)
+  ## Running the code
 
-**Interaction rules**
-- Menu items map to DVD buttons: PLAY / SCENES / AUDIO / SETUP
-- Clear focus state at all times (no mouse required)
-- Motion respects `prefers-reduced-motion`
+  Run `npm i` to install the dependencies.
 
-## Information Architecture (Step 1)
-
-- **PLAY**  About Me
-- **SCENES**  Projects (as chapters)
-- **AUDIO**  Skills (as tracks)
-- **SETUP**  Contact + Resume
-
-Source-of-truth content lives in `src/content/dvd.json`.
-
-## Dev
-
-Run the dev server:
-
-```bash
-npm run dev
-```
-
-Then open http://localhost:3000
+  Run `npm run dev` to start the development server.
+  
