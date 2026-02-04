@@ -68,7 +68,7 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
         </div>
 
         <div
-          className="text-white/95 leading-tight"
+          className="crt-ui-text crt-ui-text-mask text-white/95 leading-tight"
           style={{
             fontFamily:
               'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif',
@@ -82,7 +82,7 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
         </div>
 
         <div
-          className="mt-2 text-white/80"
+          className="crt-ui-text crt-ui-text-mask mt-2 text-white/80"
           style={{
             fontFamily:
               'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif',
