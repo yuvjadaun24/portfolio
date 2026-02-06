@@ -1,8 +1,8 @@
 import { motion } from 'motion/react';
 import { useSound } from '@/app/hooks/useSound';
-import { PixelMonitor, PixelDocument, PixelUser, PixelCode, PixelMail } from '@/app/components/icons/PixelIcons';
+import { PixelMonitor, PixelUser, PixelCode, PixelMail } from '@/app/components/icons/PixelIcons';
 
-export type Section = 'projects' | 'caseStudies' | 'about' | 'skills' | 'contact';
+export type Section = 'projects' | 'about' | 'skills' | 'contact';
 
 interface SidebarProps {
   activeSection: Section;
@@ -11,7 +11,6 @@ interface SidebarProps {
 
 const menuItems = [
   { id: 'projects' as Section, icon: PixelMonitor, label: 'Projects' },
-  { id: 'caseStudies' as Section, icon: PixelDocument, label: 'Case Studies' },
   { id: 'about' as Section, icon: PixelUser, label: 'About Me' },
   { id: 'skills' as Section, icon: PixelCode, label: 'Skills & Stack' },
   { id: 'contact' as Section, icon: PixelMail, label: 'Contact' },
@@ -21,7 +20,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
   const { playBlip, playSelect } = useSound();
 
   return (
-    <div className="w-20 bg-[#0044dd] flex flex-col items-center py-8 gap-4 border-r-4 border-black/20">
+    <div className="w-20 h-full bg-[#0044dd] flex flex-col items-center py-8 gap-4 border-r-4 border-black/20">
       {menuItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeSection === item.id;

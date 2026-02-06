@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { useSound } from '@/app/hooks/useSound';
 import { Section } from '@/app/components/Sidebar';
-import { PixelMonitor, PixelDocument, PixelUser, PixelCode, PixelMail } from '@/app/components/icons/PixelIcons';
+import { PixelMonitor, PixelUser, PixelCode, PixelMail } from '@/app/components/icons/PixelIcons';
 
 interface MobileSidebarProps {
   activeSection: Section;
@@ -10,7 +10,6 @@ interface MobileSidebarProps {
 
 const menuItems = [
   { id: 'projects' as Section, icon: PixelMonitor, label: 'Projects' },
-  { id: 'caseStudies' as Section, icon: PixelDocument, label: 'Case Studies' },
   { id: 'about' as Section, icon: PixelUser, label: 'About Me' },
   { id: 'skills' as Section, icon: PixelCode, label: 'Skills' },
   { id: 'contact' as Section, icon: PixelMail, label: 'Contact' },

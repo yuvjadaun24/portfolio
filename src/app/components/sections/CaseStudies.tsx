@@ -1,25 +1,47 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { caseStudies } from '@/app/data/portfolio-data';
+import type { CaseStudy } from '@/app/data/portfolio-data';
 import { useSound } from '@/app/hooks/useSound';
+import LenisScroll from '@/app/components/LenisScroll';
+import ResumePrinterDialog from '@/app/components/ResumePrinterDialog';
 
 export default function CaseStudies() {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
   const { playBlip } = useSound();
 
   return (
     <div className="h-full flex flex-col">
       <div className="bg-[#6633ff] px-4 md:px-6 py-3 border-b-2 border-black/20">
-        <h2 className="text-white uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '10px' }}>
-          <span className="hidden md:inline" style={{ fontSize: '14px' }}>Case Studies</span>
-          <span className="md:hidden">Case Studies</span>
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <div className="dvd-header text-white crt-glow-text" style={{ fontSize: 22, lineHeight: 1 }}>
+            CASE STUDIES / RESUME
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsResumeOpen(true)}
+            className="hidden md:inline-block px-3 py-2 border-2"
+            style={{
+              borderColor: 'rgba(0,0,0,0.25)',
+              background: 'rgba(230, 211, 46, 0.92)',
+              fontFamily: "'Press Start 2P', cursive",
+              fontSize: 9,
+              letterSpacing: '0.06em',
+              color: 'rgba(0,0,0,0.92)',
+            }}
+          >
+            OPEN RESUME
+          </button>
+        </div>
       </div>
+
+      <ResumePrinterDialog open={isResumeOpen} onOpenChange={setIsResumeOpen} />
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Case Study List */}
-        <div className="w-full md:w-2/5 bg-[#b0b0b0] overflow-y-auto border-b-2 md:border-b-0 md:border-r-2 border-black/20 max-h-48 md:max-h-full">
-          {caseStudies.map((study, index) => (
+        <LenisScroll className="w-full md:w-2/5 bg-[#b0b0b0] overflow-y-auto border-b-2 md:border-b-0 md:border-r-2 border-black/20 max-h-48 md:max-h-full">
+          {caseStudies.map((study: CaseStudy, index: number) => (
             <motion.div
               key={study.id}
               className={`px-4 py-3 cursor-pointer border-b border-black/10 transition-colors ${
@@ -40,10 +62,10 @@ export default function CaseStudies() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </LenisScroll>
 
         {/* Case Study Details */}
-        <div className="flex-1 bg-[#d0d0d0] p-4 md:p-6 overflow-y-auto">
+        <LenisScroll className="flex-1 bg-[#d0d0d0] p-4 md:p-6 overflow-y-auto">
           <motion.div
             key={selectedIndex}
             initial={{ opacity: 0, y: 10 }}
@@ -72,7 +94,7 @@ export default function CaseStudies() {
               </div>
             </div>
           </motion.div>
-        </div>
+        </LenisScroll>
       </div>
     </div>
   );

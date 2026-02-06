@@ -14,15 +14,20 @@ type CRTContainerProps = {
 
 export default function CRTContainer({ children, osd, className }: CRTContainerProps) {
   return (
-    <div className={['crt-container relative h-full w-full overflow-hidden', className].filter(Boolean).join(' ')}>
-      {/* Signal layer (DVD output) */}
-      <div className="crt-signal relative h-full w-full">{children}</div>
+    <div className={['crt-container relative h-full w-full', className].filter(Boolean).join(' ')}>
+      <div className="crt-screen relative h-full w-full">
+        {/* Signal layer (DVD output) */}
+        <div className="crt-signal relative h-full w-full">{children}</div>
 
-      {/* Post-processing chain */}
-      <CRTEffect />
+        {/* Post-processing chain (clipped to glass) */}
+        <CRTEffect />
 
-      {/* OSD sits on top of the shader (TV internal) */}
-      {osd ? <div className="crt-osd pointer-events-none fixed inset-0 z-[12000]">{osd}</div> : null}
+        {/* Glass reflection */}
+        <div className="crt-glass pointer-events-none absolute inset-0 z-[10001]" />
+
+        {/* OSD sits on top of the shader (TV internal), still clipped to the screen */}
+        {osd ? <div className="crt-osd pointer-events-none absolute inset-0 z-[12000]">{osd}</div> : null}
+      </div>
     </div>
   );
 }

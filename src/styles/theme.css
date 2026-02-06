@@ -147,6 +147,19 @@
 
   body {
     @apply bg-background text-foreground;
+    overflow: hidden;
+  }
+
+  html {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* If a Lenis root instance ever toggles this class, keep the app locked to viewport. */
+  html.lenis,
+  html.lenis body {
+    height: 100% !important;
+    overflow: hidden;
   }
 
   /**
