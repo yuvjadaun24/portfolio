@@ -137,79 +137,83 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  html, body, #root {
-    @apply h-full w-full;
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #050505;
   }
 
   body {
-    @apply bg-background text-foreground;
-    overflow: hidden;
+    visibility: hidden;
+  }
+
+  body.ready {
+    visibility: visible;
   }
 
   html {
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: auto;
+  }
+
+  * {
+    -webkit-font-smoothing: none;
+    text-rendering: geometricPrecision;
+  }
+
+  #viewport {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #050505;
     overflow: hidden;
-    overscroll-behavior: none;
   }
 
-  /* If a Lenis root instance ever toggles this class, keep the app locked to viewport. */
-  html.lenis,
-  html.lenis body {
-    height: 100% !important;
+  #ui-root {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    transform-origin: center center;
+    transform: scale(1);
+    overflow: hidden;
+
+    /* isolate layout from overlay blending */
+    isolation: isolate;
+
+    /* stable compositing */
+    backface-visibility: hidden;
+  }
+
+  #ui-content {
+    position: absolute;
+    inset: 0;
+    width: 1280px;
+    height: 720px;
     overflow: hidden;
   }
 
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
-
-  html {
-    font-size: var(--font-size);
+  #crt-overlay {
+    position: absolute;
+    inset: 0;
+    width: 1280px;
+    height: 720px;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 9999;
   }
 
-  h1 {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h2 {
-    font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h3 {
-    font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h4 {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  label {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  button {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  input {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-normal);
-    line-height: 1.5;
+  .crt-overlay-stack {
+    position: absolute;
+    inset: 0;
+    transform: translateZ(0);
+    will-change: transform, opacity;
   }
 }

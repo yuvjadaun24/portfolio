@@ -1125,3 +1125,31 @@
   height: 100%;
   border: 0;
 }
+
+/* Keep overlays strictly visual-only */
+#crt-overlay,
+.crt-overlay-stack,
+.crt-overlay-stack > div {
+  position: absolute;
+  inset: 0;
+}
+
+/* DPR mitigation for scanlines (moiré-safe) */
+:root[data-dpi='hi'] .crt-scanlines {
+  opacity: 0.13;
+  background-size: 100% 4px;
+}
+
+:root[data-dpi='hi'] .crt-noise {
+  opacity: 0.08;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-screen,
+  .crt-scanlines,
+  .crt-noise,
+  .crt-rgb,
+  .crt-ui-text {
+    animation: none !important;
+  }
+}

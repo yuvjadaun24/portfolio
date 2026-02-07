@@ -4,21 +4,13 @@ import React from 'react';
 
 export default function CRTEffect() {
   return (
-    <>
-      {/* Curvature / barrel-ish distortion layer (subtle) */}
-      <div className="crt-curvature pointer-events-none absolute inset-0 z-[9996]" />
-
-      {/* Heavy vignette */}
-      <div className="crt-vignette pointer-events-none absolute inset-0 z-[9997]" />
-
-      {/* Chromatic aberration (RGB split) */}
-      <div className="crt-rgb pointer-events-none absolute inset-0 z-[9998]" />
-
-      {/* Scanlines + interlacing + flicker */}
-      <div className="crt-scanlines pointer-events-none absolute inset-0 z-[9999]" />
-
-      {/* Analog noise / grain */}
-      <div className="crt-noise pointer-events-none absolute inset-0 z-[10000]" />
-    </>
+    <div id="crt-overlay-stack" className="crt-overlay-stack" aria-hidden="true">
+      <div className="crt-curvature pointer-events-none absolute inset-0" />
+      <div className="crt-vignette pointer-events-none absolute inset-0" />
+      <div className="crt-rgb pointer-events-none absolute inset-0" />
+      <div className="crt-scanlines pointer-events-none absolute inset-0" />
+      <div className="crt-noise pointer-events-none absolute inset-0" />
+      <div className="crt-glass pointer-events-none absolute inset-0" />
+    </div>
   );
 }
