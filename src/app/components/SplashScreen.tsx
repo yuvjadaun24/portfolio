@@ -112,7 +112,8 @@ export default function SplashScreen({ onSelect }: SplashScreenProps) {
             transform: 'skewX(-10deg)',
           }}
         >
-          DVD
+          DVD 
+          {/* Hellpp */}
         </div>
 
         <div
