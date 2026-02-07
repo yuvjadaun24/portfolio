@@ -113,7 +113,6 @@ export default function SplashScreen({ onSelect }: SplashScreenProps) {
           }}
         >
           DVD 
-          {/* Hellpp */}
         </div>
 
         <div
