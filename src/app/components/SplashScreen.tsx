@@ -112,7 +112,7 @@ export default function SplashScreen({ onSelect }: SplashScreenProps) {
             transform: 'skewX(-10deg)',
           }}
         >
-          DVD 
+          DVD Test
         </div>
 
         <div
