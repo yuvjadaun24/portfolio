@@ -1,8 +1,8 @@
 import { motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
-import { aboutData, contactData } from '@/app/data/portfolio-data';
-import LenisScroll from '@/app/components/LenisScroll';
-import ResumePrinterDialog from '@/app/components/ResumePrinterDialog';
+import { aboutData, contactData } from '../../data/portfolio-data';
+import LenisScroll from '../LenisScroll';
+import ResumePrinterDialog from '../ResumePrinterDialog';
 // Update the import path below to the correct relative path if the file exists:
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 // If the file is not in '../figma/', adjust the path accordingly.
