@@ -30,14 +30,14 @@ export default function KeyboardHint() {
     <AnimatePresence>
       {showHint && (
         <motion.div
-          className="fixed bottom-20 md:bottom-4 right-4 bg-black/90 backdrop-blur-sm px-4 py-3 rounded-md border-2 border-[#E6D32E] z-50"
+          className="fixed bottom-20 md:bottom-4 right-4 bg-black/80 backdrop-blur-sm px-4 py-3 rounded-md border border-white/10 z-50 dvd-body"
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.9 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-3">
-            <div className="text-[#E6D32E]">
+            <div className="text-cyan-200">
               <svg
                 viewBox="0 0 24 24"
                 className="w-6 h-6"
@@ -50,9 +50,9 @@ export default function KeyboardHint() {
                 <path d="M6 12h12M6 16h12" />
               </svg>
             </div>
-            <div className="text-white text-xs" style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '8px' }}>
-              <div className="mb-1">Use Arrow Keys</div>
-              <div className="text-[#E6D32E]">↑ ↓ + ENTER</div>
+            <div className="text-white/75 text-xs" style={{ fontSize: '11px', letterSpacing: '0.12em' }}>
+              <div className="mb-1">USE ARROW KEYS</div>
+              <div className="text-cyan-200">↑ ↓ + ENTER</div>
             </div>
           </div>
         </motion.div>

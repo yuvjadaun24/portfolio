@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { Dialog, DialogContent } from '@/app/components/ui/dialog';
-import { resumeData } from '@/app/data/portfolio-data';
+import { Dialog, DialogContent } from './ui/dialog';
+import { resumeData } from '../data/portfolio-data';
 
 function downloadResume() {
   const a = document.createElement('a');

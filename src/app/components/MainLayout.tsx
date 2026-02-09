@@ -4,7 +4,6 @@ import Sidebar, { Section } from './Sidebar';
 import MobileSidebar from './MobileSidebar';
 import Footer from './Footer';
 import KeyboardHint from './KeyboardHint';
-import LiquidBackground from './LiquidBackground';
 import Projects from './sections/Projects';
 import About from './sections/About';
 import Skills from './sections/Skills';
@@ -216,19 +215,47 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
   };
 
   return (
-    <div className="size-full relative overflow-hidden bg-[#0033cc] flex items-center justify-center">
-      {/* Animated Liquid Background */}
-      <LiquidBackground />
+    <div className="size-full relative overflow-hidden bg-black flex items-center justify-center">
+      {/* Global tactical overlays */}
+      <div className="hud-grid" aria-hidden="true" />
+      <div className="hud-scanlines" aria-hidden="true" />
+      <div className="hud-vignette" aria-hidden="true" />
 
       {/* Main Container */}
       <motion.div
-        className="relative z-10 w-full md:w-[95%] h-full md:h-[90%] max-w-7xl flex flex-col shadow-2xl"
+        className="relative z-10 w-full md:w-[95%] h-full md:h-[90%] max-w-7xl flex flex-col"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Tactical HUD frame + corner readouts */}
+        <div className="hud-frame" aria-hidden="true">
+          <span className="hud-corner hud-corner--tl" />
+          <span className="hud-corner hud-corner--tr" />
+          <span className="hud-corner hud-corner--bl" />
+          <span className="hud-corner hud-corner--br" />
+        </div>
+
+        <div className="pointer-events-none absolute left-6 top-6 z-20 dvd-body text-white/70" style={{ fontSize: 12 }}>
+          <div className="flex items-center gap-2">
+            <span className="rec-dot" aria-hidden="true" />
+            <span style={{ letterSpacing: '0.14em' }}>REC</span>
+          </div>
+          <div className="mt-2" style={{ letterSpacing: '0.12em' }}>
+            LAT: 28.61
+          </div>
+          <div style={{ letterSpacing: '0.12em' }}>
+            LNG: 77.20
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute right-6 top-6 z-20 dvd-body text-white/70 text-right" style={{ fontSize: 12 }}>
+          <div style={{ letterSpacing: '0.12em' }}>SYS: ONLINE</div>
+          <div className="mt-2" style={{ letterSpacing: '0.12em' }}>LINK: SECURE</div>
+        </div>
+
         {/* Content Area */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden md:rounded-t-lg border-4 border-black/30">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden md:rounded-md border border-white/10 bg-black/40">
           {/* Mobile Sidebar (Top) */}
           <div className="md:hidden">
             <MobileSidebar activeSection={activeSection} onSectionChange={requestSectionChange} />
@@ -240,7 +267,7 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 bg-[#b0b0b0] overflow-hidden relative">
+          <div className="flex-1 bg-black/30 overflow-hidden relative">
             <div ref={contentRef} className="size-full">
               <AnimatePresence mode="wait">
                 <motion.div

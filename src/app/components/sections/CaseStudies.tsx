@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { caseStudies } from '@/app/data/portfolio-data';
-import type { CaseStudy } from '@/app/data/portfolio-data';
-import { useSound } from '@/app/hooks/useSound';
-import LenisScroll from '@/app/components/LenisScroll';
-import ResumePrinterDialog from '@/app/components/ResumePrinterDialog';
+import { caseStudies } from '../../data/portfolio-data';
+import type { CaseStudy } from '../../data/portfolio-data';
+import { useSound } from '../../hooks/useSound';
+import LenisScroll from '../LenisScroll';
+import ResumePrinterDialog from '../ResumePrinterDialog';
 
 export default function CaseStudies() {
   const [selectedIndex, setSelectedIndex] = useState(0);
