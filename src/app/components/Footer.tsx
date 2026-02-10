@@ -2,7 +2,7 @@ import { PixelArrowUp, PixelArrowDown, PixelEnter, PixelDisplay } from '@/app/co
 
 export default function Footer() {
   return (
-    <div className="h-12 bg-black/55 border-t border-white/10 flex items-center justify-between px-6 dvd-body">
+    <div className="h-12 bg-black/35 border-t border-white/10 flex items-center justify-between px-6 dvd-body">
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">
           <div className="flex gap-1">

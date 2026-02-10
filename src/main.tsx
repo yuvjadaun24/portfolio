@@ -5,41 +5,21 @@ import './styles/index.css';
 import { DeviceProvider } from './app/device/DeviceContext';
 import CRTEffect from './app/components/CRTEffect';
 
-const BASE_WIDTH = 1280;
-const BASE_HEIGHT = 720;
+/* ── Fluid layout ──
+   No more 1280×720 box. The UI fills 100vw × 100dvh.
+   We still detect DPI for CRT quality, but no transform scaling. */
 
-function applyDisplayFlags(scale: number) {
+function applyDisplayFlags() {
   const dpr = window.devicePixelRatio ?? 1;
   const isMac = /Mac/i.test(navigator.platform || '');
 
-  // Basic DPI flag used by CSS.
   document.documentElement.dataset.dpi = dpr > 1 ? 'hi' : 'lo';
-
-  // Provide scale to CSS for any future tuning.
-  document.documentElement.style.setProperty('--ui-scale', String(scale));
-
-  // On high-DPI screens with fractional transform scales, fine repeating patterns (scanlines/noise)
-  // can alias (moiré) and look like full-page flicker. Switch to a lighter CRT preset.
-  const effective = scale * dpr;
-  const nearInteger = Math.abs(effective - Math.round(effective)) < 0.03;
-  document.documentElement.dataset.crtQuality = (dpr >= 2 && (isMac || !nearInteger)) ? 'lite' : 'full';
+  document.documentElement.style.setProperty('--ui-scale', '1');
+  document.documentElement.dataset.crtQuality = (dpr >= 2 && isMac) ? 'lite' : 'full';
 }
 
-// NOTE (NON-NEGOTIABLE): scaling must use the exact float from Math.min(...)
-// Do NOT quantize/round/clamp/snap this value.
-function scaleUI() {
-  const scale = Math.min(window.innerWidth / BASE_WIDTH, window.innerHeight / BASE_HEIGHT);
-  const root = document.getElementById('ui-root') as HTMLDivElement | null;
-  if (!root) return;
-  root.style.transform = `scale(${scale})`;
-
-  applyDisplayFlags(scale);
-}
-
-// Initialize flags early (before fonts are ready) to avoid a frame of "full" CRT on Retina.
-applyDisplayFlags(1);
-window.addEventListener('resize', scaleUI, { passive: true });
-window.addEventListener('load', scaleUI);
+applyDisplayFlags();
+window.addEventListener('resize', applyDisplayFlags, { passive: true });
 
 const overlayNode = document.getElementById('crt-overlay');
 if (!overlayNode) throw new Error('Missing #crt-overlay node');
@@ -49,12 +29,12 @@ const overlayRoot = createRoot(overlayNode);
 (document as any).fonts?.ready
   ?.then(() => {
     document.body.classList.add('ready');
-    scaleUI();
+    applyDisplayFlags();
     overlayRoot.render(<CRTEffect />);
   })
   .catch(() => {
     document.body.classList.add('ready');
-    scaleUI();
+    applyDisplayFlags();
     overlayRoot.render(<CRTEffect />);
   });
 

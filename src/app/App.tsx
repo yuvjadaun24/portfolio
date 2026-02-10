@@ -1,30 +1,16 @@
 import React, { useState } from 'react';
-import BootSequence from './components/BootSequence';
+import BiometricLockScreen from './components/BiometricLockScreen';
 import MainLayout from './components/MainLayout';
-import SplashScreen from './components/SplashScreen';
-import { useDevice } from './device/DeviceContext';
 import type { Section } from './components/Sidebar';
 
 export default function App() {
-  const { state, transitionTo } = useDevice();
-  const [initialSection, setInitialSection] = useState<Section>('projects');
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [initialSection] = useState<Section>('projects');
 
   return (
-    <div style={{ width: 1280, height: 720 }}>
-      {state === 'BOOTING' ? <BootSequence /> : null}
-      {state === 'MENU_ROOT' ? (
-        <SplashScreen
-          onSelect={(nextSection) => {
-            setInitialSection(nextSection);
-            transitionTo('PLAYING_CONTENT');
-          }}
-        />
-      ) : null}
-
-      {state === 'PLAYING_CONTENT' ? <MainLayout initialSection={initialSection} /> : null}
-      {state !== 'BOOTING' && state !== 'MENU_ROOT' && state !== 'PLAYING_CONTENT' ? (
-        <MainLayout initialSection={initialSection} />
-      ) : null}
+    <div className="w-full h-full">
+      {!isAuthorized ? <BiometricLockScreen onUnlock={() => setIsAuthorized(true)} /> : null}
+      {isAuthorized ? <MainLayout initialSection={initialSection} /> : null}
     </div>
   );
 }

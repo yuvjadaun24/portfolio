@@ -9,7 +9,7 @@ export default function LiquidBackground() {
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse at 50% 50%, rgba(0, 102, 128, 0.95) 0%, rgba(0, 26, 41, 1) 100%)',
+            'radial-gradient(ellipse at 50% 50%, rgba(0, 128, 160, 0.95) 0%, rgba(0, 52, 72, 1) 100%)',
         }}
       />
 

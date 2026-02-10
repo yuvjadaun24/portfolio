@@ -215,64 +215,71 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
   };
 
   return (
-    <div className="size-full relative overflow-hidden bg-black flex items-center justify-center">
-      {/* Global tactical overlays */}
+    <div className="w-full h-full relative overflow-hidden bg-[#060d14]">
+      {/* Full-bleed tactical overlays */}
       <div className="hud-grid" aria-hidden="true" />
       <div className="hud-scanlines" aria-hidden="true" />
       <div className="hud-vignette" aria-hidden="true" />
 
-      {/* Main Container */}
+      {/* HUD corner anchors — pinned to viewport edges */}
+      <div className="hud-frame" aria-hidden="true">
+        <span className="hud-corner hud-corner--tl" />
+        <span className="hud-corner hud-corner--tr" />
+        <span className="hud-corner hud-corner--bl" />
+        <span className="hud-corner hud-corner--br" />
+      </div>
+
+      {/* Top-left readout */}
+      <div
+        className="pointer-events-none absolute z-20 dvd-body text-white/70"
+        style={{
+          top: 'clamp(12px, 3vh, 28px)',
+          left: 'clamp(12px, 3vw, 28px)',
+          fontSize: 'clamp(9px, 1.4vh, 13px)',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="rec-dot" aria-hidden="true" />
+          <span style={{ letterSpacing: '0.14em' }}>REC</span>
+        </div>
+        <div className="mt-2" style={{ letterSpacing: '0.12em' }}>LAT: 28.61</div>
+        <div style={{ letterSpacing: '0.12em' }}>LNG: 77.20</div>
+      </div>
+
+      {/* Top-right readout */}
+      <div
+        className="pointer-events-none absolute z-20 dvd-body text-white/70 text-right"
+        style={{
+          top: 'clamp(12px, 3vh, 28px)',
+          right: 'clamp(12px, 3vw, 28px)',
+          fontSize: 'clamp(9px, 1.4vh, 13px)',
+        }}
+      >
+        <div style={{ letterSpacing: '0.12em' }}>SYS: ONLINE</div>
+        <div className="mt-2" style={{ letterSpacing: '0.12em' }}>LINK: SECURE</div>
+      </div>
+
+      {/* Main layout: sidebar + content */}
       <motion.div
-        className="relative z-10 w-full md:w-[95%] h-full md:h-[90%] max-w-7xl flex flex-col"
-        initial={{ opacity: 0, scale: 0.9 }}
+        className="relative z-10 w-full h-full flex flex-col md:flex-row"
+        initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Tactical HUD frame + corner readouts */}
-        <div className="hud-frame" aria-hidden="true">
-          <span className="hud-corner hud-corner--tl" />
-          <span className="hud-corner hud-corner--tr" />
-          <span className="hud-corner hud-corner--bl" />
-          <span className="hud-corner hud-corner--br" />
+        {/* Desktop Sidebar (Left Column) — hidden on mobile */}
+        <div className="hidden md:flex flex-shrink-0">
+          <Sidebar activeSection={activeSection} onSectionChange={requestSectionChange} />
         </div>
 
-        <div className="pointer-events-none absolute left-6 top-6 z-20 dvd-body text-white/70" style={{ fontSize: 12 }}>
-          <div className="flex items-center gap-2">
-            <span className="rec-dot" aria-hidden="true" />
-            <span style={{ letterSpacing: '0.14em' }}>REC</span>
-          </div>
-          <div className="mt-2" style={{ letterSpacing: '0.12em' }}>
-            LAT: 28.61
-          </div>
-          <div style={{ letterSpacing: '0.12em' }}>
-            LNG: 77.20
-          </div>
-        </div>
-
-        <div className="pointer-events-none absolute right-6 top-6 z-20 dvd-body text-white/70 text-right" style={{ fontSize: 12 }}>
-          <div style={{ letterSpacing: '0.12em' }}>SYS: ONLINE</div>
-          <div className="mt-2" style={{ letterSpacing: '0.12em' }}>LINK: SECURE</div>
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden md:rounded-md border border-white/10 bg-black/40">
-          {/* Mobile Sidebar (Top) */}
-          <div className="md:hidden">
-            <MobileSidebar activeSection={activeSection} onSectionChange={requestSectionChange} />
-          </div>
-
-          {/* Desktop Sidebar (Left) */}
-          <div className="hidden md:block">
-            <Sidebar activeSection={activeSection} onSectionChange={requestSectionChange} />
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 bg-black/30 overflow-hidden relative">
-            <div ref={contentRef} className="size-full">
+        {/* Content area fills remaining space */}
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+          {/* Main content */}
+          <div className="flex-1 bg-black/5 overflow-hidden relative">
+            <div ref={contentRef} className="w-full h-full">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeSection}
-                  className="size-full"
+                  className="w-full h-full"
                   initial={{ opacity: 0, scaleX: 0.02, scaleY: 0.92 }}
                   animate={{ opacity: 1, scaleX: 1, scaleY: 1 }}
                   exit={{ opacity: 0, scaleX: 0.02, scaleY: 0.92 }}
@@ -289,15 +296,20 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
               <div className="pointer-events-none absolute inset-0 z-[200] tv-static" />
             ) : null}
           </div>
+
+          {/* Desktop Footer — hidden on mobile */}
+          <div className="hidden md:block flex-shrink-0">
+            <Footer />
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="hidden md:block">
-          <Footer />
+        {/* Mobile Bottom Tab Bar — visible only on small screens */}
+        <div className="md:hidden flex-shrink-0">
+          <MobileSidebar activeSection={activeSection} onSectionChange={requestSectionChange} />
         </div>
       </motion.div>
 
-      {/* Keyboard Navigation Hint */}
+      {/* Keyboard hint */}
       <KeyboardHint />
     </div>
   );
