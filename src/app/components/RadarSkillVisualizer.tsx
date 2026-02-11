@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { skills as skillGroups } from '../data/portfolio-data';
-import { SkillCallout } from './SkillCallout';
+import { useScrambleText } from './SkillCallout';
 
 type CategoryId = 'design' | 'frontend' | 'backend' | 'tools';
 
@@ -14,10 +14,9 @@ type RadarNode = {
 type Category = {
   id: CategoryId;
   label: string;
-  nodes: RadarNode[]; // always 6
+  nodes: RadarNode[];
 };
 
-const AXES = 6;
 const RINGS = 5;
 
 function clamp(n: number, min: number, max: number) {
@@ -102,32 +101,27 @@ function summaryForSkill(label: string, categoryLabel: string) {
   );
 }
 
-function pointAt(cx: number, cy: number, radius: number, axisIndex: number) {
-  const angle = (-Math.PI / 2) + (axisIndex * (2 * Math.PI / AXES));
+/** Master coordinate function — works for any number of sides. */
+function pointAtN(cx: number, cy: number, radius: number, index: number, totalSides: number) {
+  const angle = -Math.PI / 2 + index * (2 * Math.PI / totalSides);
   return {
     x: cx + radius * Math.cos(angle),
     y: cy + radius * Math.sin(angle),
+    angle,
   };
 }
 
-function polygonPath(cx: number, cy: number, maxRadius: number, values: number[]) {
-  const points = values.map((v, i) => {
-    const r = (clamp(v, 0, 100) / 100) * maxRadius;
-    return pointAt(cx, cy, r, i);
-  });
-
-  const d = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
-    .join(' ');
-  return `${d} Z`;
+function ringPath(cx: number, cy: number, radius: number, sides: number) {
+  const points = Array.from({ length: sides }, (_, i) => pointAtN(cx, cy, radius, i, sides));
+  return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ') + ' Z';
 }
 
-function hexPath(cx: number, cy: number, radius: number) {
-  const points = Array.from({ length: AXES }, (_, i) => pointAt(cx, cy, radius, i));
-  const d = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
-    .join(' ');
-  return `${d} Z`;
+function dataPolygonPath(cx: number, cy: number, maxRadius: number, values: number[], sides: number) {
+  const points = values.map((v, i) => {
+    const r = (clamp(v, 0, 100) / 100) * maxRadius;
+    return pointAtN(cx, cy, r, i, sides);
+  });
+  return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ') + ' Z';
 }
 
 function seededBits(count: number) {
@@ -209,6 +203,116 @@ function TypewriterTerminal({ text }: { text: string }) {
   );
 }
 
+function DegreeRing({ size = 640 }: { size?: number }) {
+  const view = 200;
+  const cx = view / 2;
+  const cy = view / 2;
+  const r = 86;
+
+  const ticks = Array.from({ length: 72 }, (_, i) => i * 5); // every 5 degrees
+  const labelAngles = Array.from({ length: 8 }, (_, i) => i * 45); // 0..315
+
+  const polar = (deg: number, radius: number) => {
+    const a = ((deg - 90) * Math.PI) / 180;
+    return { x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) };
+  };
+
+  return (
+    <div
+      className="absolute pointer-events-none opacity-10 animate-[spin_60s_linear_infinite]"
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+    >
+      <svg width="100%" height="100%" viewBox={`0 0 ${view} ${view}`} className="block" style={{ color: 'rgb(6 182 212)' }}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="currentColor" strokeWidth={0.8} opacity={0.55} />
+
+        {ticks.map((deg) => {
+          const major = deg % 30 === 0;
+          const p1 = polar(deg, r - (major ? 6 : 3));
+          const p2 = polar(deg, r + (major ? 6 : 3));
+          return (
+            <line
+              key={deg}
+              x1={p1.x}
+              y1={p1.y}
+              x2={p2.x}
+              y2={p2.y}
+              stroke="currentColor"
+              strokeWidth={major ? 1.2 : 0.8}
+              opacity={major ? 0.75 : 0.45}
+            />
+          );
+        })}
+
+        {labelAngles.map((deg) => {
+          const p = polar(deg, r + 14);
+          return (
+            <text
+              key={deg}
+              x={p.x}
+              y={p.y}
+              fill="currentColor"
+              fontSize={6.5}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              opacity={0.7}
+              style={{ fontFamily: 'Space Mono, ui-monospace, monospace', letterSpacing: '0.12em' }}
+            >
+              {`${deg}°`}
+            </text>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function TelemetryTerminal({ text }: { text: string }) {
+  const { chars } = useScrambleText(text, { durationMs: 260 });
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-cyan-950/30 backdrop-blur-md">
+      {/* Corner brackets only */}
+      <span className="panel-corner panel-corner--tl" />
+      <span className="panel-corner panel-corner--tr" />
+      <span className="panel-corner panel-corner--bl" />
+      <span className="panel-corner panel-corner--br" />
+
+      <div className="p-4 h-full">
+        <div className="dvd-body text-white/80 whitespace-pre-wrap" style={{ fontSize: 12, lineHeight: 1.65, letterSpacing: '0.06em' }}>
+          {chars.length ? (
+            chars.map((c, i) => (
+              <span key={i} className={c.resolved ? 'text-white/85' : 'text-cyan-200/35'}>
+                {c.ch}
+              </span>
+            ))
+          ) : (
+            <span className="text-white/70"> </span>
+          )}
+          <span className="terminal-cursor" aria-hidden="true" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScrambleSummary({ text }: { text: string }) {
+  const { chars } = useScrambleText(text, { durationMs: 600 });
+  return (
+    <>
+      {chars.length ? (
+        chars.map((c, i) => (
+          <span key={i} className={c.resolved ? 'text-white/85' : 'text-cyan-300/30'}>
+            {c.ch}
+          </span>
+        ))
+      ) : (
+        <span className="text-white/60"> </span>
+      )}
+    </>
+  );
+}
+
 export default function RadarSkillVisualizer() {
   const levelMap: Record<string, number> = useMemo(
     () => ({
@@ -248,15 +352,14 @@ export default function RadarSkillVisualizer() {
   }, []);
 
   const categories: Category[] = useMemo(() => {
-    const buildNodes = (items: string[]) => {
-      const padded = [...items];
-      while (padded.length < AXES) padded.push('—');
-      return padded.slice(0, AXES).map((label) => {
-        const level = label === '—' ? 0 : levelMap[label] ?? 6;
-        const value = label === '—' ? 0 : clamp(Math.round((level / 10) * 100), 0, 100);
-        return { key: toNodeKey(label), label, value } satisfies RadarNode;
-      });
-    };
+    const buildNodes = (items: string[]) =>
+      items
+        .filter((label) => label && label !== '—')
+        .map((label) => {
+          const level = levelMap[label] ?? 6;
+          const value = clamp(Math.round((level / 10) * 100), 0, 100);
+          return { key: toNodeKey(label), label, value } satisfies RadarNode;
+        });
 
     return [
       {
@@ -296,42 +399,97 @@ export default function RadarSkillVisualizer() {
   const cy = view / 2;
   const maxRadius = 150;
 
-  const values = activeCategory.nodes.map((n) => n.value);
-  const polygonD = useMemo(() => polygonPath(cx, cy, maxRadius, values), [cx, cy, maxRadius, values.join(',')]);
+  // Dynamic side count based on real (non-placeholder) data
+  const validNodes = activeCategory.nodes;
+  const totalSides = validNodes.length;
 
-  const hoveredNode = hoveredNodeIndex == null ? null : activeCategory.nodes[hoveredNodeIndex] ?? null;
+  // Fixed "Targeting Lock" callout — pushed into top-left periphery
+  const calloutBox = { x: -220, y: -20, w: 210, h: 155 };
+  const calloutAnchor = { x: calloutBox.x + calloutBox.w, y: calloutBox.y + calloutBox.h / 2 };
+
+  const values = validNodes.map((n) => n.value);
+  const polygonD = useMemo(
+    () => dataPolygonPath(cx, cy, maxRadius, values, totalSides),
+    [cx, cy, maxRadius, values.join(','), totalSides],
+  );
+
+  const hoveredNode = hoveredNodeIndex == null ? null : validNodes[hoveredNodeIndex] ?? null;
   const hoveredNodePoint = useMemo(() => {
     if (hoveredNodeIndex == null) return null;
-    const node = activeCategory.nodes[hoveredNodeIndex];
-    if (!node || node.label === '—') return null;
+    const node = validNodes[hoveredNodeIndex];
+    if (!node) return null;
     const r = (node.value / 100) * maxRadius;
-    return pointAt(cx, cy, r, hoveredNodeIndex);
-  }, [hoveredNodeIndex, activeCategory.nodes, cx, cy, maxRadius]);
+    return pointAtN(cx, cy, r, hoveredNodeIndex, totalSides);
+  }, [hoveredNodeIndex, validNodes, cx, cy, maxRadius, totalSides]);
+
+  // Shallow-sweep connector: dot → sweeping diagonal → horizontal snap into box.
+  // Elbow sits 60 viewBox-units right of the box, at the box's Y mid-line.
+  const connector = useMemo(() => {
+    if (!hoveredNodePoint) return null;
+    const dot = hoveredNodePoint;
+    const elbowX = calloutAnchor.x + 60;
+    const elbowY = calloutAnchor.y;
+    return {
+      path: `M ${dot.x.toFixed(1)},${dot.y.toFixed(1)} L ${elbowX.toFixed(1)},${elbowY.toFixed(1)} L ${calloutAnchor.x},${calloutAnchor.y.toFixed(1)}`,
+      elbow: { x: elbowX, y: elbowY },
+    };
+  }, [hoveredNodePoint, calloutAnchor.x, calloutAnchor.y]);
 
   const hoveredSummary = useMemo(() => {
-    if (!hoveredNode || hoveredNode.label === '—') return '';
+    if (!hoveredNode) return '';
     return summaryForSkill(hoveredNode.label, activeCategory.label);
   }, [hoveredNode?.label, activeCategory.label]);
-  const terminalText = useMemo(() => {
-    if (!hoveredNode || hoveredNode.label === '—') {
+
+  const telemetryText = useMemo(() => {
+    if (!hoveredNode) {
       return [
         `>> SYSTEM DIAGNOSTICS ONLINE`,
-        `>> HOVER A NODE TO ANALYZE`,
-        `>> ACTIVE MODULE: ${activeCategory.label}`,
+        `>> SCAN FOR TARGETS...`,
+        `>> ACTIVE MODULE: ${activeCategory.label.toUpperCase()}`,
       ].join('\n');
     }
 
     return [
-      `>> ANALYZING NODE: ${hoveredNode.key}`,
-      `>> PROFICIENCY: ${hoveredNode.value}%`,
-      `>> STATUS: ${statusFor(hoveredNode.value)}`,
+      `>> TARGET ACQUIRED: ${hoveredNode.key}`,
+      `>> DECRYPTING...`,
+      `>> SPECIALIZATION: ${toNodeKey(hoveredNode.label)}`,
+      `>> STATUS: ${hoveredNode.value >= 85 ? 'EXPERT LEVEL' : statusFor(hoveredNode.value)}`,
     ].join('\n');
-  }, [hoveredNode?.key, hoveredNode?.value, hoveredNode?.label, activeCategory.label]);
+  }, [hoveredNode?.key, hoveredNode?.label, hoveredNode?.value, activeCategory.label]);
 
   const dust = useMemo(() => seededDust(28), []);
 
   const [tilt, setTilt] = useState({ rx: 8, ry: -10 });
   const rafRef = useRef<number | null>(null);
+
+  const hudRef = useRef<HTMLDivElement | null>(null);
+  const chartRef = useRef<HTMLDivElement | null>(null);
+  const [crosshair, setCrosshair] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const hudEl = hudRef.current;
+    const chartEl = chartRef.current;
+    if (!hudEl || !chartEl) return;
+
+    const update = () => {
+      const hudRect = hudEl.getBoundingClientRect();
+      const chartRect = chartEl.getBoundingClientRect();
+      setCrosshair({
+        x: chartRect.left - hudRect.left + chartRect.width / 2,
+        y: chartRect.top - hudRect.top + chartRect.height / 2,
+      });
+    };
+
+    update();
+    const ro = new ResizeObserver(() => update());
+    ro.observe(hudEl);
+    ro.observe(chartEl);
+    window.addEventListener('resize', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
@@ -357,267 +515,368 @@ export default function RadarSkillVisualizer() {
   }, [activeCategoryId]);
 
   return (
-    <div className="w-full">
-      <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6">
-        {/* Left: Controller */}
-        <div
-          className="holo-panel rounded-md p-4"
-          style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.05), 0 0 24px rgba(134,239,172,0.06)' }}
-        >
-          <div className="dvd-header text-white/90 crt-glow-text" style={{ fontSize: 18, lineHeight: 1 }}>
-            CONTROLLER
-          </div>
-          <div className="mt-4 space-y-2">
-            {categories.map((cat) => {
-              const active = cat.id === activeCategoryId;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onMouseEnter={() => setActiveCategoryId(cat.id)}
-                  onFocus={() => setActiveCategoryId(cat.id)}
-                  className={
-                    'w-full text-left px-3 py-2 border border-white/10 dvd-body tracking-wider bg-transparent ' +
-                    (active ? 'text-green-300' : 'text-white/70')
-                  }
-                  style={
-                    active
-                      ? {
-                          boxShadow: '0 0 0 1px rgba(134,239,172,0.25), 0 0 18px rgba(134,239,172,0.18)',
-                        }
-                      : undefined
-                  }
-                >
-                  <span className={active ? 'crt-glow-text' : ''}>{`> ${cat.label}`}</span>
-                </button>
-              );
-            })}
-          </div>
+    <div ref={hudRef} className="relative w-full h-full overflow-hidden flex bg-black/90 p-8">
+      {/* Crosshair overlay (absolute, spans whole screen; aligned to chart center) */}
+      {crosshair ? (
+        <div className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
+          <div className="absolute left-0 right-0 h-[1px] bg-cyan-500" style={{ top: crosshair.y }} />
+          <div className="absolute top-0 bottom-0 w-[1px] bg-cyan-500" style={{ left: crosshair.x }} />
+        </div>
+      ) : null}
 
-          <div className="mt-4 text-white/60 dvd-body" style={{ fontSize: 12, lineHeight: 1.6 }}>
-            HOVER MODULES TO RECALIBRATE RADAR.
-          </div>
+      {/* Left: Locked Controller */}
+      <div className="w-[300px] h-full flex flex-col justify-center pl-6 z-10 shrink-0 relative">
+        <span className="panel-corner panel-corner--tl" />
+        <span className="panel-corner panel-corner--tr" />
+        <span className="panel-corner panel-corner--bl" />
+        <span className="panel-corner panel-corner--br" />
+
+        <div className="dvd-header text-white/90 crt-glow-text" style={{ fontSize: 18, lineHeight: 1 }}>
+          CONTROLLER
         </div>
 
-        {/* Right: Visualizer */}
-        <div className="flex flex-col gap-4">
-          <div
-            className="relative projector-chamber holo-panel rounded-md p-4"
-            style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.05), 0 0 30px rgba(134,239,172,0.08)' }}
-          >
-            <div className="dvd-header text-white/90 crt-glow-text" style={{ fontSize: 18, lineHeight: 1 }}>
-              VISUALIZER
-            </div>
-
-            {/* Volumetric projector rays */}
-            <div className="projector-rays" aria-hidden="true" />
-
-            {/* Holographic projection container */}
-            <div className="mt-4 relative mx-auto" style={{ maxWidth: 420, width: '100%', aspectRatio: '1 / 1' }}>
-              {/* Dust particles floating in 3D space */}
-              <div className="absolute inset-0 pointer-events-none" style={{ transformStyle: 'preserve-3d' }}>
-                {dust.map((p) => (
-                  <motion.div
-                    key={p.id}
-                    className="absolute"
-                    style={{
-                      left: `${p.left}%`,
-                      top: `${p.top}%`,
-                      width: p.size,
-                      height: p.size,
-                      borderRadius: 9999,
-                      background: 'rgba(255,255,255,0.65)',
-                      transform: `translateZ(${p.z}px)`,
-                      boxShadow: '0 0 10px rgba(134,239,172,0.22)',
-                      opacity: 0.35,
-                    }}
-                    initial={{ y: 18, x: 0, opacity: 0 }}
-                    animate={{ y: [10, p.driftY], x: [0, p.driftX], opacity: [0, 0.45, 0] }}
-                    transition={{ duration: p.duration, repeat: Infinity, ease: 'easeInOut', delay: p.delay }}
-                    aria-hidden="true"
-                  />
-                ))}
-              </div>
-
-              <motion.div
-                className="absolute inset-0"
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-                animate={{ rotateX: tilt.rx, rotateY: tilt.ry }}
-                transition={{ type: 'spring', stiffness: 130, damping: 18, mass: 0.6 }}
-                style={{
-                  transformStyle: 'preserve-3d',
-                  perspective: 1200,
-                }}
+        <div className="mt-5 space-y-3">
+          {categories.map((cat, idx) => {
+            const active = cat.id === activeCategoryId;
+            const channel = String(idx + 1).padStart(2, '0');
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onMouseEnter={() => setActiveCategoryId(cat.id)}
+                onFocus={() => setActiveCategoryId(cat.id)}
+                className={
+                  'w-full text-left dvd-body tracking-wider bg-transparent px-2 py-2 ' +
+                  (active ? 'text-green-300' : 'text-white/55')
+                }
               >
-                {/* Chart stack */}
-                <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-                  {/* Layer 1: back wireframe */}
-                  <div className="absolute inset-0" style={{ transform: 'translateZ(-50px)' }}>
-                    <svg
-                      width="100%"
-                      height="100%"
-                      viewBox={`0 0 ${view} ${view}`}
-                      className="block holo-glow"
-                      style={{ color: 'rgb(134 239 172)', opacity: 0.55 }}
-                      onMouseLeave={() => setHoveredNodeIndex(null)}
-                    >
-                      <g opacity={0.35}>
-                        {Array.from({ length: RINGS }, (_, i) => {
-                          const r = (maxRadius * (i + 1)) / RINGS;
-                          return (
-                            <path
-                              key={i}
-                              d={hexPath(cx, cy, r)}
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={1}
-                              opacity={i === RINGS - 1 ? 0.55 : 0.22}
-                            />
-                          );
-                        })}
-
-                        {Array.from({ length: AXES }, (_, i) => {
-                          const p = pointAt(cx, cy, maxRadius, i);
-                          return (
-                            <line
-                              key={i}
-                              x1={cx}
-                              y1={cy}
-                              x2={p.x}
-                              y2={p.y}
-                              stroke="currentColor"
-                              strokeWidth={1}
-                              opacity={0.18}
-                            />
-                          );
-                        })}
-                      </g>
-                    </svg>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {active ? <span className="w-2 h-2 animate-pulse bg-green-500 shrink-0" aria-hidden="true" /> : <span className="w-2 h-2 bg-white/20 shrink-0" aria-hidden="true" />}
+                    <span className={active ? 'crt-glow-text' : ''}>{`[ CH_${channel} ] ${cat.label.toUpperCase()}`}</span>
                   </div>
-
-                  {/* Layer 2: data polygon */}
-                  <div className="absolute inset-0" style={{ transform: 'translateZ(0px)' }}>
-                    <svg
-                      width="100%"
-                      height="100%"
-                      viewBox={`0 0 ${view} ${view}`}
-                      className="block holo-glow"
-                      style={{ color: 'rgb(134 239 172)' }}
-                    >
-                      <defs>
-                        <radialGradient id="hologram-gradient" cx="50%" cy="45%" r="60%">
-                          <stop offset="0%" stopColor="currentColor" stopOpacity="0.45" />
-                          <stop offset="65%" stopColor="currentColor" stopOpacity="0.14" />
-                          <stop offset="100%" stopColor="currentColor" stopOpacity="0.0" />
-                        </radialGradient>
-                      </defs>
-
-                      <motion.path
-                        d={polygonD}
-                        animate={{ d: polygonD }}
-                        transition={{ duration: 0.55, ease: 'easeInOut' }}
-                        fill="url(#hologram-gradient)"
-                        stroke="currentColor"
-                        strokeWidth={2.5}
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-
-                  {/* Layer 3: labels + nodes */}
-                  <div className="absolute inset-0" style={{ transform: 'translateZ(50px)' }}>
-                    <svg
-                      width="100%"
-                      height="100%"
-                      viewBox={`0 0 ${view} ${view}`}
-                      className="block holo-glow"
-                      style={{ color: 'rgb(134 239 172)' }}
-                      onMouseLeave={() => setHoveredNodeIndex(null)}
-                    >
-                      {activeCategory.nodes.map((node, i) => {
-                        const r = (node.value / 100) * maxRadius;
-                        const p = pointAt(cx, cy, r, i);
-                        const labelP = pointAt(cx, cy, maxRadius + 20, i);
-                        const active = hoveredNodeIndex === i;
-
-                        return (
-                          <g key={node.key}>
-                            <text
-                              x={labelP.x}
-                              y={labelP.y}
-                              fill="rgba(255,255,255,0.78)"
-                              fontSize={10}
-                              textAnchor={labelP.x < cx - 5 ? 'end' : labelP.x > cx + 5 ? 'start' : 'middle'}
-                              dominantBaseline={labelP.y < cy ? 'auto' : 'hanging'}
-                              style={{ fontFamily: 'Space Mono, ui-monospace, monospace', letterSpacing: '0.10em' }}
-                            >
-                              {node.label === '—' ? '' : node.label.toUpperCase()}
-                            </text>
-
-                            <motion.circle
-                              cx={p.x}
-                              cy={p.y}
-                              r={active ? 5 : 4}
-                              fill={active ? 'rgba(255,255,255,0.95)' : 'currentColor'}
-                              animate={{ r: active ? 5 : 4, opacity: active ? 1 : 0.85 }}
-                              transition={{ duration: 0.18 }}
-                            />
-
-                            {/* Hit zone (large, invisible, interactive) */}
-                            <circle
-                              cx={p.x}
-                              cy={p.y}
-                              r={30}
-                              fill="transparent"
-                              className="cursor-crosshair"
-                              onMouseEnter={() => node.label !== '—' && setHoveredNodeIndex(i)}
-                              onMouseLeave={() => setHoveredNodeIndex(null)}
-                              aria-label={node.label === '—' ? 'Empty node' : `Analyze ${node.label}`}
-                            />
-                          </g>
-                        );
-                      })}
-                    </svg>
-
-                    {/* Cinematic data callout */}
-                    <AnimatePresence>
-                      {hoveredNode && hoveredNode.label !== '—' && hoveredNodePoint ? (
-                        <SkillCallout
-                          key={hoveredNode.key}
-                          view={view}
-                          center={{ x: cx, y: cy }}
-                          chartRadius={maxRadius}
-                          anchor={hoveredNodePoint}
-                          skillId={hoveredNode.key}
-                          skillName={hoveredNode.label}
-                          summary={hoveredSummary}
-                        />
-                      ) : null}
-                    </AnimatePresence>
-                  </div>
+                  <span className={active ? 'text-green-300' : 'text-white/40'}>{active ? '[ ACTIVE ]' : '[ OFFLINE ]'}</span>
                 </div>
-              </motion.div>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between">
-              <div className="dvd-body text-white/60" style={{ fontSize: 12 }}>
-                ACTIVE: <span className="text-green-300">{activeCategory.label}</span>
-              </div>
-              <div className="dvd-body text-white/60" style={{ fontSize: 12 }}>
-                SIGNAL: <span className="text-green-200">STABLE</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom: Details */}
-          <div>
-            <div className="dvd-header text-white/90 crt-glow-text mb-2" style={{ fontSize: 18, lineHeight: 1 }}>
-              DETAILS
-            </div>
-            <TypewriterTerminal text={terminalText} />
-          </div>
+              </button>
+            );
+          })}
         </div>
+
+        <div className="mt-5 text-white/55 dvd-body" style={{ fontSize: 12, lineHeight: 1.6, letterSpacing: '0.10em' }}>
+          CALIBRATION CHANNELS ONLINE.
+        </div>
+      </div>
+
+      {/* Center: The Visualizer (takes remaining space) */}
+      <div className="flex-1 relative flex justify-center items-center z-10">
+        {/* Rotating Outer Ring */}
+        <DegreeRing size={720} />
+
+        {/* Holographic projection container */}
+        <div ref={chartRef} className="relative" style={{ width: 'min(520px, 64vmin)', aspectRatio: '1 / 1' }}>
+          {/* Volumetric projector rays */}
+          <div className="projector-rays" aria-hidden="true" />
+
+          <div className="absolute inset-0 projector-chamber" aria-hidden="true" />
+
+          {/* Dust particles floating in 3D space */}
+          <div className="absolute inset-0 pointer-events-none" style={{ transformStyle: 'preserve-3d' }}>
+            {dust.map((p) => (
+              <motion.div
+                key={p.id}
+                className="absolute"
+                style={{
+                  left: `${p.left}%`,
+                  top: `${p.top}%`,
+                  width: p.size,
+                  height: p.size,
+                  borderRadius: 9999,
+                  background: 'rgba(255,255,255,0.65)',
+                  transform: `translateZ(${p.z}px)`,
+                  boxShadow: '0 0 10px rgba(34,211,238,0.22)',
+                  opacity: 0.35,
+                }}
+                initial={{ y: 18, x: 0, opacity: 0 }}
+                animate={{ y: [10, p.driftY], x: [0, p.driftX], opacity: [0, 0.45, 0] }}
+                transition={{ duration: p.duration, repeat: Infinity, ease: 'easeInOut', delay: p.delay }}
+                aria-hidden="true"
+              />
+            ))}
+          </div>
+
+          <motion.div
+            className="absolute inset-0"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            animate={{ rotateX: tilt.rx, rotateY: tilt.ry }}
+            transition={{ type: 'spring', stiffness: 130, damping: 18, mass: 0.6 }}
+            style={{
+              transformStyle: 'preserve-3d',
+              perspective: 1200,
+            }}
+          >
+            {/* Chart stack */}
+            <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+              {/* Layer 1: back wireframe */}
+              <div className="absolute inset-0" style={{ transform: 'translateZ(-50px)' }}>
+                <svg
+                  width="100%"
+                  height="100%"
+                  viewBox={`0 0 ${view} ${view}`}
+                  className="block holo-glow"
+                  style={{ color: 'rgb(34 211 238)', opacity: 0.55 }}
+                  overflow="visible"
+                  onMouseLeave={() => setHoveredNodeIndex(null)}
+                >
+                  <g opacity={0.35}>
+                    {/* Dynamic concentric rings — adapts to totalSides */}
+                    {Array.from({ length: RINGS }, (_, i) => {
+                      const r = (maxRadius * (i + 1)) / RINGS;
+                      return (
+                        <path
+                          key={i}
+                          d={ringPath(cx, cy, r, totalSides)}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={1}
+                          opacity={i === RINGS - 1 ? 0.55 : 0.22}
+                        />
+                      );
+                    })}
+
+                    {/* Dynamic spoke lines */}
+                    {Array.from({ length: totalSides }, (_, i) => {
+                      const p = pointAtN(cx, cy, maxRadius, i, totalSides);
+                      return (
+                        <line
+                          key={i}
+                          x1={cx}
+                          y1={cy}
+                          x2={p.x}
+                          y2={p.y}
+                          stroke="currentColor"
+                          strokeWidth={1}
+                          opacity={0.18}
+                        />
+                      );
+                    })}
+                  </g>
+                </svg>
+              </div>
+
+              {/* Layer 2: data polygon */}
+              <div className="absolute inset-0" style={{ transform: 'translateZ(0px)' }}>
+                <svg
+                  width="100%"
+                  height="100%"
+                  viewBox={`0 0 ${view} ${view}`}
+                  className="block holo-glow"
+                  style={{ color: 'rgb(34 211 238)' }}
+                  overflow="visible"
+                >
+                  <defs>
+                    <radialGradient id="hologram-gradient" cx="50%" cy="45%" r="60%">
+                      <stop offset="0%" stopColor="currentColor" stopOpacity="0.40" />
+                      <stop offset="65%" stopColor="currentColor" stopOpacity="0.12" />
+                      <stop offset="100%" stopColor="currentColor" stopOpacity="0.0" />
+                    </radialGradient>
+                  </defs>
+
+                  <motion.path
+                    d={polygonD}
+                    animate={{ d: polygonD }}
+                    transition={{ duration: 0.55, ease: 'easeInOut' }}
+                    fill="url(#hologram-gradient)"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+
+              {/* Layer 3: labels + nodes */}
+              <div className="absolute inset-0" style={{ transform: 'translateZ(50px)' }}>
+                <svg
+                  width="100%"
+                  height="100%"
+                  viewBox={`0 0 ${view} ${view}`}
+                  className="block holo-glow"
+                  style={{ color: 'rgb(34 211 238)' }}
+                  overflow="visible"
+                  onMouseLeave={() => setHoveredNodeIndex(null)}
+                >
+                  {validNodes.map((node, i) => {
+                    const r = (node.value / 100) * maxRadius;
+                    const p = pointAtN(cx, cy, r, i, totalSides);
+                    const labelP = pointAtN(cx, cy, maxRadius + 28, i, totalSides);
+                    const cosA = Math.cos(labelP.angle);
+                    const active = hoveredNodeIndex === i;
+
+                    return (
+                      <g key={node.key}>
+                        <text
+                          x={labelP.x}
+                          y={labelP.y}
+                          fill="rgba(255,255,255,0.78)"
+                          fontSize={10}
+                          textAnchor={cosA > 0.1 ? 'start' : cosA < -0.1 ? 'end' : 'middle'}
+                          dominantBaseline={labelP.y < cy ? 'auto' : 'hanging'}
+                          style={{ fontFamily: 'Space Mono, ui-monospace, monospace', letterSpacing: '0.10em' }}
+                        >
+                          {node.label.toUpperCase()}
+                        </text>
+
+                        <motion.circle
+                          cx={p.x}
+                          cy={p.y}
+                          r={active ? 5 : 4}
+                          fill={active ? 'rgba(255,255,255,0.95)' : 'currentColor'}
+                          animate={{ r: active ? 5 : 4, opacity: active ? 1 : 0.85 }}
+                          transition={{ duration: 0.18 }}
+                        />
+
+                        {/* Hit zone */}
+                        <circle
+                          cx={p.x}
+                          cy={p.y}
+                          r={30}
+                          fill="transparent"
+                          className="cursor-crosshair"
+                          onMouseEnter={() => setHoveredNodeIndex(i)}
+                          onMouseLeave={() => setHoveredNodeIndex(null)}
+                          aria-label={`Analyze ${node.label}`}
+                        />
+                      </g>
+                    );
+                  })}
+                </svg>
+
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Fixed "Targeting Lock" — pinned top-left with elbow connector */}
+          <AnimatePresence>
+            {hoveredNode && hoveredNodePoint ? (
+              <>
+                {/* Elbow connector SVG (same viewBox → coordinates align with chart) */}
+                {/* 45° dogleg connector SVG */}
+                {connector ? (
+                  <svg
+                    className="absolute inset-0 w-full h-full pointer-events-none z-30"
+                    viewBox={`0 0 ${view} ${view}`}
+                    overflow="visible"
+                    aria-hidden="true"
+                  >
+                    {/* Shallow sweep → horizontal rail */}
+                    <motion.path
+                      key={`conn-${hoveredNode.key}`}
+                      d={connector.path}
+                      stroke="rgb(0 224 255)"
+                      strokeWidth={1.5}
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      style={{ filter: 'drop-shadow(0 0 6px rgba(0,224,255,0.35))' }}
+                    />
+
+                    {/* Mechanical joint at the sweep→horizontal bend */}
+                    <motion.circle
+                      cx={connector.elbow.x}
+                      cy={connector.elbow.y}
+                      r={2}
+                      fill="rgb(0 224 255)"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, transition: { duration: 0.08 } }}
+                      transition={{ delay: 0.12, duration: 0.12 }}
+                      style={{ filter: 'drop-shadow(0 0 10px rgba(0,224,255,0.55))' }}
+                    />
+
+                    {/* Outer ring at joint */}
+                    <motion.circle
+                      cx={connector.elbow.x}
+                      cy={connector.elbow.y}
+                      r={5}
+                      fill="none"
+                      stroke="rgb(0 224 255)"
+                      strokeWidth={0.5}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 0.45, scale: 1 }}
+                      exit={{ opacity: 0, transition: { duration: 0.06 } }}
+                      transition={{ delay: 0.14, duration: 0.15 }}
+                    />
+
+                    {/* Terminal dot at box anchor edge */}
+                    <motion.circle
+                      cx={calloutAnchor.x}
+                      cy={calloutAnchor.y}
+                      r={2}
+                      fill="rgb(0 224 255)"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, transition: { duration: 0.08 } }}
+                      transition={{ delay: 0.18, duration: 0.12 }}
+                      style={{ filter: 'drop-shadow(0 0 8px rgba(0,224,255,0.5))' }}
+                    />
+                  </svg>
+                ) : null}
+
+                {/* Pinned callout card (top-left, viewBox-aligned %) */}
+                <motion.div
+                  key={`card-${hoveredNode.key}`}
+                  className="absolute pointer-events-none z-40 overflow-hidden"
+                  style={{
+                    left: `${(calloutBox.x / view) * 100}%`,
+                    top: `${(calloutBox.y / view) * 100}%`,
+                    width: `${(calloutBox.w / view) * 100}%`,
+                    height: `${(calloutBox.h / view) * 100}%`,
+                  }}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.1 } }}
+                  transition={{ delay: 0.18, duration: 0.2, ease: 'easeOut' }}
+                >
+                  <div className="relative w-full h-full bg-cyan-950/50 backdrop-blur-md overflow-hidden">
+                    <span className="panel-corner panel-corner--tl" />
+                    <span className="panel-corner panel-corner--tr" />
+                    <span className="panel-corner panel-corner--bl" />
+                    <span className="panel-corner panel-corner--br" />
+                    <div className="px-3 py-2">
+                      <motion.div
+                        className="dvd-body text-cyan-300/90"
+                        style={{ fontSize: 10, letterSpacing: '0.12em' }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: [0, 1, 0.4, 1] }}
+                        transition={{ duration: 0.3, ease: 'easeOut', delay: 0.22 }}
+                      >
+                        {`>> TARGET LOCK: ${hoveredNode.key}`}
+                      </motion.div>
+                      <div className="mt-0.5 dvd-body text-white/65" style={{ fontSize: 9.5, letterSpacing: '0.08em' }}>
+                        {`>> ${hoveredNode.value}% — ${statusFor(hoveredNode.value)}`}
+                      </div>
+                      <div
+                        className="mt-1.5 dvd-body whitespace-pre-wrap overflow-hidden"
+                        style={{ fontSize: 9, lineHeight: 1.45, letterSpacing: '0.02em' }}
+                      >
+                        <ScrambleSummary text={hoveredSummary} />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            ) : null}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Bottom Right: Locked Telemetry */}
+      <div className="absolute bottom-8 right-8 w-[400px] h-[120px] min-h-[120px] overflow-hidden z-20">
+        <TelemetryTerminal text={telemetryText} />
       </div>
     </div>
   );

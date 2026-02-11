@@ -542,6 +542,43 @@
   border-bottom: 1px solid rgba(0, 240, 255, 0.55);
 }
 
+/* Small corner brackets for panel framing (no solid borders) */
+.panel-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.panel-corner--tl {
+  left: 8px;
+  top: 8px;
+  border-left: 1px solid rgba(0, 240, 255, 0.55);
+  border-top: 1px solid rgba(0, 240, 255, 0.55);
+}
+
+.panel-corner--tr {
+  right: 8px;
+  top: 8px;
+  border-right: 1px solid rgba(0, 240, 255, 0.55);
+  border-top: 1px solid rgba(0, 240, 255, 0.55);
+}
+
+.panel-corner--bl {
+  left: 8px;
+  bottom: 8px;
+  border-left: 1px solid rgba(0, 240, 255, 0.55);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.55);
+}
+
+.panel-corner--br {
+  right: 8px;
+  bottom: 8px;
+  border-right: 1px solid rgba(0, 240, 255, 0.55);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.55);
+}
+
 :root[data-crt-quality='lite'] .hud-scanlines {
   animation: none;
 }
