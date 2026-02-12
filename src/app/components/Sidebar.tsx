@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSound } from '../hooks/useSound';
 
@@ -7,63 +7,18 @@ export type Section = 'projects' | 'about' | 'skills' | 'contact';
 interface SidebarProps {
   activeSection: Section;
   onSectionChange: (section: Section) => void;
+  onHoverPreview?: (text: string | null) => void;
 }
 
 /* ── menu data ─────────────────────────────────────────── */
-const menuItems: { id: Section; num: string; label: string }[] = [
-  { id: 'projects', num: '01', label: 'DASHBOARD' },
-  { id: 'about', num: '02', label: 'AGENT_PROFILE' },
-  { id: 'skills', num: '03', label: 'DIAGNOSTICS' },
-  { id: 'contact', num: '04', label: 'UPLINK' },
+const menuItems: { id: Section; num: string; label: string; uplink: string }[] = [
+  { id: 'projects', num: '01', label: 'DASHBOARD', uplink: 'DASHBOARD_MAIN' },
+  { id: 'about', num: '02', label: 'AGENT_PROFILE', uplink: 'AGENT_DOSSIER' },
+  { id: 'skills', num: '03', label: 'DIAGNOSTICS', uplink: 'SYS_DIAGNOSTICS' },
+  { id: 'contact', num: '04', label: 'UPLINK', uplink: 'CONTACT_UPLINK' },
 ];
 
-/* ── Decrypting Text ───────────────────────────────────── */
-const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*!?/<>';
-
-function DecryptingText({ text, active }: { text: string; active: boolean }) {
-  const [display, setDisplay] = useState(text);
-  const frameRef = useRef(0);
-  const rafRef = useRef<number>(0);
-
-  useEffect(() => {
-    if (!active) {
-      setDisplay(text);
-      return;
-    }
-    const chars = text.split('');
-    const resolved = new Array(chars.length).fill(false);
-    let iteration = 0;
-
-    const tick = () => {
-      iteration++;
-      const next = chars.map((ch, i) => {
-        if (ch === ' ') return ' ';
-        if (resolved[i]) return ch;
-        // resolve ~1-2 chars per frame after a few scramble rounds
-        if (iteration > 3 + i * 2) {
-          resolved[i] = true;
-          return ch;
-        }
-        return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
-      });
-      setDisplay(next.join(''));
-      if (resolved.every(Boolean)) return;
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    // short initial delay
-    frameRef.current = window.setTimeout(() => {
-      rafRef.current = requestAnimationFrame(tick);
-    }, 40);
-    return () => {
-      window.clearTimeout(frameRef.current);
-      cancelAnimationFrame(rafRef.current);
-    };
-  }, [active, text]);
-
-  return <span>{display}</span>;
-}
-
-/* ── Servo Hover Sound (high-pitched zzzzt) ──────────── */
+/* ── Servo Hover Sound ───────────────────────────────── */
 function useServoSound() {
   const ctxRef = useRef<AudioContext | null>(null);
   const getCtx = useCallback(() => {
@@ -80,7 +35,6 @@ function useServoSound() {
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-      // fast servo sweep: 2200 → 3400 Hz
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(2200, ctx.currentTime);
       osc.frequency.linearRampToValueAtTime(3400, ctx.currentTime + 0.06);
@@ -95,364 +49,237 @@ function useServoSound() {
   }, [getCtx]);
 }
 
-/* ── Scrolling Tick-Mark Rail (SVG pattern) ──────────── */
-function TickRail({ height }: { height: number }) {
-  // We render a tall SVG with tick marks and animate its Y offset to loop.
-  const TICK_SPACING = 12;
-  const SEGMENT = TICK_SPACING * 40; // one cycle height
-  const majorEvery = 5;
-
+/* ── System Heartbeat (bottom visualizer) ────────────── */
+function SystemHeartbeat() {
+  const BAR_COUNT = 7;
   return (
-    <div
-      className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 pointer-events-none overflow-hidden"
-      style={{ width: 20 }}
-    >
-      {/* the 1px rail line */}
-      <div
-        className="absolute left-1/2 top-0 bottom-0 -translate-x-[0.5px]"
-        style={{ width: 1, background: 'rgba(0,224,255,0.12)' }}
-      />
-      {/* scrolling ticks */}
-      <motion.svg
-        className="absolute left-0"
-        width={20}
-        height={SEGMENT * 2}
-        animate={{ y: [0, -SEGMENT] }}
-        transition={{ duration: 18, ease: 'linear', repeat: Infinity }}
-        aria-hidden="true"
-      >
-        {Array.from({ length: Math.ceil((SEGMENT * 2) / TICK_SPACING) }, (_, i) => {
-          const y = i * TICK_SPACING;
-          const isMajor = i % majorEvery === 0;
-          const w = isMajor ? 7 : 4;
-          const opacity = isMajor ? 0.25 : 0.1;
-          return (
-            <line
-              key={i}
-              x1={10 - w}
-              y1={y}
-              x2={10 + w}
-              y2={y}
-              stroke="rgba(0,224,255,1)"
-              strokeWidth={isMajor ? 1 : 0.5}
-              opacity={opacity}
-            />
-          );
-        })}
-      </motion.svg>
-    </div>
-  );
-}
-
-/* ── Ghost Reticle (tracks mouse Y) ──────────────────── */
-function GhostReticle({ y }: { y: ReturnType<typeof useSpring> }) {
-  return (
-    <motion.div
-      className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-30"
-      style={{
-        y,
-        width: 28,
-        height: 28,
-        marginTop: -14,
-      }}
-    >
-      {/* bracket corners — the [ ] reticle */}
-      <svg width={28} height={28} viewBox="0 0 28 28" fill="none" className="absolute inset-0">
-        {/* top-left */}
-        <path d="M2 9 L2 2 L9 2" stroke="rgba(0,224,255,0.7)" strokeWidth={1.5} />
-        {/* top-right */}
-        <path d="M19 2 L26 2 L26 9" stroke="rgba(0,224,255,0.7)" strokeWidth={1.5} />
-        {/* bottom-left */}
-        <path d="M2 19 L2 26 L9 26" stroke="rgba(0,224,255,0.7)" strokeWidth={1.5} />
-        {/* bottom-right */}
-        <path d="M19 26 L26 26 L26 19" stroke="rgba(0,224,255,0.7)" strokeWidth={1.5} />
-        {/* center cross-hair dot */}
-        <circle cx={14} cy={14} r={1.5} fill="rgba(0,224,255,0.5)" />
-      </svg>
-    </motion.div>
-  );
-}
-
-/* ── Single Nav Item ─────────────────────────────────── */
-function NavItem({
-  item,
-  isActive,
-  isHovered,
-  onHoverStart,
-  onHoverEnd,
-  onClick,
-  yCenter,
-}: {
-  item: (typeof menuItems)[number];
-  isActive: boolean;
-  isHovered: boolean;
-  onHoverStart: () => void;
-  onHoverEnd: () => void;
-  onClick: () => void;
-  yCenter: number;
-}) {
-  const showLabel = isHovered || isActive;
-
-  return (
-    <div
-      className="relative flex items-center"
-      style={{ height: 44 }}
-      onMouseEnter={onHoverStart}
-      onMouseLeave={onHoverEnd}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
-    >
-      {/* The Diamond node on the rail */}
-      <div className="relative z-20 flex items-center justify-center" style={{ width: 44 }}>
+    <div className="flex items-end justify-center gap-[3px] h-9 px-3 opacity-60">
+      {Array.from({ length: BAR_COUNT }, (_, i) => (
         <motion.div
-          className="flex items-center justify-center"
-          style={{
-            width: 18,
-            height: 18,
-            rotate: 45,
-            background: isActive
-              ? 'rgba(10,255,0,0.15)'
-              : isHovered
-                ? 'rgba(0,224,255,0.1)'
-                : 'rgba(0,0,0,0.6)',
-            border: isActive
-              ? '1px solid rgba(10,255,0,0.6)'
-              : isHovered
-                ? '1px solid rgba(0,224,255,0.5)'
-                : '1px solid rgba(0,224,255,0.18)',
-            boxShadow: isActive
-              ? '0 0 12px rgba(10,255,0,0.3), inset 0 0 6px rgba(10,255,0,0.1)'
-              : 'none',
-            cursor: 'pointer',
-          }}
+          key={i}
+          className="w-[3px] rounded-[1px]"
+          style={{ background: 'rgba(0,224,255,0.55)' }}
           animate={{
-            scale: isHovered && !isActive ? 1.15 : 1,
+            height: [4, 12 + Math.random() * 18, 6, 20 + Math.random() * 10, 4],
           }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        >
-          <span
-            className="dvd-body"
-            style={{
-              rotate: '-45deg',
-              fontSize: 'clamp(6px, 0.9vw, 8px)',
-              letterSpacing: '0.04em',
-              color: isActive
-                ? 'rgba(10,255,0,0.9)'
-                : isHovered
-                  ? 'rgba(0,224,255,0.85)'
-                  : 'rgba(0,224,255,0.4)',
-              display: 'block',
-            }}
-          >
-            {item.num}
-          </span>
-        </motion.div>
-      </div>
-
-      {/* Active connector line — horizontal beam from node into content */}
-      {isActive && (
-        <motion.div
-          className="absolute z-10"
-          style={{
-            left: 31,
-            top: '50%',
-            height: 1,
-            marginTop: -0.5,
-            background: 'linear-gradient(90deg, rgba(10,255,0,0.5) 0%, rgba(10,255,0,0) 100%)',
+          transition={{
+            duration: 1.2 + Math.random() * 0.8,
+            repeat: Infinity,
+            repeatType: 'mirror',
+            ease: 'easeInOut',
+            delay: i * 0.09,
           }}
-          initial={{ width: 0 }}
-          animate={{ width: 'clamp(60px, 8vw, 120px)' }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
         />
-      )}
-
-      {/* The reveal tab — slides out on hover */}
-      <AnimatePresence>
-        {showLabel && (
-          <motion.div
-            className="absolute z-20 flex items-center overflow-hidden"
-            style={{
-              left: 40,
-              top: '50%',
-              translateY: '-50%',
-            }}
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 'auto', opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-          >
-            <div
-              className="dvd-body whitespace-nowrap"
-              style={{
-                fontSize: 'clamp(8px, 1.1vw, 10px)',
-                letterSpacing: '0.16em',
-                paddingInline: 'clamp(6px, 0.8vw, 10px)',
-                paddingBlock: '3px',
-                color: isActive ? 'rgba(10,255,0,0.9)' : 'rgba(0,224,255,0.85)',
-                background: isActive
-                  ? 'rgba(10,255,0,0.06)'
-                  : 'rgba(0,224,255,0.06)',
-                borderTop: `1px solid ${isActive ? 'rgba(10,255,0,0.25)' : 'rgba(0,224,255,0.2)'}`,
-                borderRight: `1px solid ${isActive ? 'rgba(10,255,0,0.25)' : 'rgba(0,224,255,0.2)'}`,
-                borderBottom: `1px solid ${isActive ? 'rgba(10,255,0,0.25)' : 'rgba(0,224,255,0.2)'}`,
-              }}
-            >
-              <DecryptingText text={item.label} active={isHovered} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      ))}
     </div>
   );
 }
 
 /* ══════════════════════════════════════════════════════════
-   TARGETING RAIL SIDEBAR
+   MAG-LEV CONTROL SPINE
    ══════════════════════════════════════════════════════════ */
-export default function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
+export default function Sidebar({ activeSection, onSectionChange, onHoverPreview }: SidebarProps) {
   const { playSelect } = useSound();
   const playServo = useServoSound();
-  const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredId, setHoveredId] = useState<Section | null>(null);
-  const [containerHeight, setContainerHeight] = useState(400);
 
-  // Track mouse Y inside the sidebar
-  const rawMouseY = useMotionValue(containerHeight / 2);
-  const reticleY = useSpring(rawMouseY, { stiffness: 300, damping: 30, mass: 0.6 });
-
-  // Item Y positions (measured from container top)
-  const itemRefs = useRef<Map<Section, HTMLDivElement>>(new Map());
-  const itemCenters = useRef<Map<Section, number>>(new Map());
-
-  const measureItems = useCallback(() => {
-    if (!containerRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
-    setContainerHeight(containerRect.height);
-    itemRefs.current.forEach((el, id) => {
-      const rect = el.getBoundingClientRect();
-      itemCenters.current.set(id, rect.top - containerRect.top + rect.height / 2);
-    });
-  }, []);
-
-  useEffect(() => {
-    measureItems();
-    window.addEventListener('resize', measureItems);
-    return () => window.removeEventListener('resize', measureItems);
-  }, [measureItems]);
-
-  // Mouse-move handler with magnetic snapping
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!containerRef.current) return;
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const localY = e.clientY - containerRect.top;
-
-      // Find closest item for magnetic snap
-      let closestId: Section | null = null;
-      let closestDist = Infinity;
-      itemCenters.current.forEach((cy, id) => {
-        const d = Math.abs(localY - cy);
-        if (d < closestDist) {
-          closestDist = d;
-          closestId = id;
-        }
-      });
-
-      const SNAP_RADIUS = 28;
-      if (closestId && closestDist < SNAP_RADIUS) {
-        rawMouseY.set(itemCenters.current.get(closestId)!);
-      } else {
-        rawMouseY.set(localY);
-      }
-    },
-    [rawMouseY],
-  );
-
-  const handleItemHover = useCallback(
+  const handleHoverStart = useCallback(
     (id: Section) => {
       setHoveredId(id);
       playServo();
-      // snap reticle to this item
-      const cy = itemCenters.current.get(id);
-      if (cy != null) rawMouseY.set(cy);
+      const item = menuItems.find((m) => m.id === id);
+      if (item && onHoverPreview) {
+        onHoverPreview(`>> PREVIEW: ${item.uplink}`);
+      }
     },
-    [playServo, rawMouseY],
+    [playServo, onHoverPreview],
   );
 
+  const handleHoverEnd = useCallback(() => {
+    setHoveredId(null);
+    onHoverPreview?.(null);
+  }, [onHoverPreview]);
+
   return (
-    <div
-      ref={containerRef}
-      className="h-full relative flex flex-col items-center"
+    <nav
+      className="h-full relative flex flex-col items-center select-none"
       style={{
-        width: 'clamp(44px, 5vw, 56px)',
-        background: 'rgba(0,0,0,0.15)',
-        borderRight: '1px solid rgba(0,224,255,0.06)',
+        width: 96,
+        background: 'rgba(0,0,0,0.40)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRight: '1px solid rgba(0,224,255,0.25)',
       }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => setHoveredId(null)}
+      onMouseLeave={handleHoverEnd}
     >
-      {/* Scrolling tick-mark rail */}
-      <TickRail height={containerHeight} />
-
-      {/* Ghost reticle — follows mouse */}
-      <GhostReticle y={reticleY} />
-
-      {/* Header label */}
+      {/* ── The Central Rail Track ── */}
       <div
-        className="relative z-20 dvd-body text-center mt-4 mb-2"
+        className="absolute left-1/2 top-0 bottom-0 -translate-x-[0.5px] pointer-events-none"
+        style={{ width: 1, background: 'rgba(0,224,255,0.12)' }}
+      />
+
+      {/* ── Top Label ── */}
+      <div
+        className="relative z-10 font-mono text-center mt-5 mb-1"
         style={{
-          fontSize: 'clamp(6px, 0.8vw, 8px)',
-          letterSpacing: '0.2em',
-          color: 'rgba(0,224,255,0.3)',
-          writingMode: 'vertical-lr',
-          textOrientation: 'mixed',
-          transform: 'rotate(180deg)',
-          height: 'clamp(50px, 8vh, 80px)',
+          fontSize: 7,
+          letterSpacing: '0.28em',
+          color: 'rgba(0,224,255,0.28)',
         }}
       >
-        TARGETING RAIL
+        MAG-LEV
+        <br />
+        SPINE
       </div>
 
-      {/* Nav nodes — centered vertically */}
-      <div className="relative z-20 flex-1 flex flex-col items-center justify-center gap-2">
-        {menuItems.map((item) => (
-          <div
-            key={item.id}
-            ref={(el) => {
-              if (el) itemRefs.current.set(item.id, el);
-            }}
-          >
-            <NavItem
-              item={item}
-              isActive={activeSection === item.id}
-              isHovered={hoveredId === item.id}
-              onHoverStart={() => handleItemHover(item.id)}
-              onHoverEnd={() => setHoveredId(null)}
+      {/* ── Navigation Nodes ── */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-1">
+        {menuItems.map((item) => {
+          const isActive = activeSection === item.id;
+          const isHovered = hoveredId === item.id;
+
+          return (
+            <div
+              key={item.id}
+              className="relative flex items-center justify-center cursor-pointer"
+              style={{ width: 96, height: 88 }}
+              onMouseEnter={() => handleHoverStart(item.id)}
+              onMouseLeave={handleHoverEnd}
               onClick={() => {
                 playSelect();
                 onSectionChange(item.id);
               }}
-              yCenter={0}
-            />
-          </div>
-        ))}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  playSelect();
+                  onSectionChange(item.id);
+                }
+              }}
+            >
+              {/* ── Active: The Mag-Lev Carriage (sliding bracket) ── */}
+              {isActive && (
+                <motion.div
+                  layoutId="mag-lev-carriage"
+                  className="absolute inset-x-[6px] inset-y-0"
+                  style={{
+                    borderTop: '1px solid rgba(0,224,255,0.5)',
+                    borderBottom: '1px solid rgba(0,224,255,0.5)',
+                    background: 'rgba(0,224,255,0.06)',
+                    boxShadow: '0 0 20px rgba(0,224,255,0.12), inset 0 0 12px rgba(0,224,255,0.04)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                />
+              )}
+
+              {/* ── The Diamond Node ── */}
+              <motion.div
+                className="relative z-20 flex items-center justify-center"
+                style={{
+                  width: 22,
+                  height: 22,
+                  rotate: 45,
+                  background: isActive
+                    ? 'rgba(10,255,0,0.12)'
+                    : 'rgba(0,0,0,0.6)',
+                  border: isActive
+                    ? '1px solid rgba(10,255,0,0.6)'
+                    : '1px solid rgba(0,224,255,0.22)',
+                  boxShadow: isActive
+                    ? '0 0 14px rgba(10,255,0,0.25), inset 0 0 6px rgba(10,255,0,0.08)'
+                    : 'none',
+                  transition: 'border-color 0.2s, background 0.2s, box-shadow 0.2s',
+                }}
+                animate={{
+                  scale: isHovered && !isActive ? 1.3 : 1,
+                  rotate: isHovered && !isActive ? 45 + 90 : 45,
+                  borderColor: isHovered && !isActive
+                    ? 'rgba(0,224,255,0.6)'
+                    : undefined,
+                }}
+                transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+              >
+                <span
+                  className="font-mono block select-none"
+                  style={{
+                    transform: 'rotate(-45deg)',
+                    fontSize: 8,
+                    letterSpacing: '0.04em',
+                    color: isActive
+                      ? 'rgba(10,255,0,0.9)'
+                      : isHovered
+                        ? 'rgba(0,224,255,0.9)'
+                        : 'rgba(0,224,255,0.45)',
+                    transition: 'color 0.15s',
+                  }}
+                >
+                  {item.num}
+                </span>
+              </motion.div>
+
+              {/* ── Vertical Label (ONLY when active) ── */}
+              <AnimatePresence>
+                {isActive && (
+                  <motion.span
+                    className="absolute z-20 font-mono select-none pointer-events-none"
+                    style={{
+                      right: 7,
+                      top: '50%',
+                      writingMode: 'vertical-rl',
+                      textOrientation: 'mixed',
+                      transform: 'translateY(-50%) rotate(180deg)',
+                      fontSize: 9,
+                      letterSpacing: '0.22em',
+                      color: 'rgba(0,224,255,0.75)',
+                      textShadow: '0 0 8px rgba(0,224,255,0.3)',
+                      whiteSpace: 'nowrap',
+                    }}
+                    initial={{ opacity: 0, x: 6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 6 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+
+              {/* ── Hover: Connector line shoots to top of sidebar ── */}
+              <AnimatePresence>
+                {isHovered && !isActive && (
+                  <motion.div
+                    className="absolute left-1/2 -translate-x-[0.5px] bottom-full pointer-events-none"
+                    style={{
+                      width: 1,
+                      background: 'linear-gradient(0deg, rgba(0,224,255,0.4) 0%, rgba(0,224,255,0) 100%)',
+                    }}
+                    initial={{ height: 0 }}
+                    animate={{ height: 60 }}
+                    exit={{ height: 0 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Bottom status */}
-      <div
-        className="relative z-20 dvd-body text-center mb-4"
-        style={{
-          fontSize: 'clamp(5px, 0.7vw, 7px)',
-          letterSpacing: '0.14em',
-          color: 'rgba(0,224,255,0.2)',
-        }}
-      >
-        SYS
-        <br />
-        RDY
+      {/* ── Bottom: System Heartbeat Visualizer ── */}
+      <div className="relative z-10 mb-5 w-full">
+        <div
+          className="text-center font-mono mb-2"
+          style={{
+            fontSize: 6,
+            letterSpacing: '0.2em',
+            color: 'rgba(0,224,255,0.22)',
+          }}
+        >
+          SYS PULSE
+        </div>
+        <SystemHeartbeat />
       </div>
-    </div>
+    </nav>
   );
 }

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import Sidebar, { Section } from './Sidebar';
 import MobileSidebar from './MobileSidebar';
 import Footer from './Footer';
-import KeyboardHint from './KeyboardHint';
 import Projects from './sections/Projects';
 import About from './sections/About';
 import Skills from './sections/Skills';
@@ -106,6 +105,7 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
   const [activeSection, setActiveSection] = useState<Section>(initialSection);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
+  const [hoverPreview, setHoverPreview] = useState<string | null>(null);
   const { playBlip, playSelect } = useSound();
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -255,7 +255,7 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
           fontSize: 'clamp(9px, 1.4vh, 13px)',
         }}
       >
-        <div style={{ letterSpacing: '0.12em' }}>SYS: ONLINE</div>
+        <div style={{ letterSpacing: '0.12em' }}>{hoverPreview ? hoverPreview : 'SYS: ONLINE'}</div>
         <div className="mt-2" style={{ letterSpacing: '0.12em' }}>LINK: SECURE</div>
       </div>
 
@@ -268,7 +268,7 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
       >
         {/* Desktop Sidebar (Left Column) — hidden on mobile */}
         <div className="hidden md:flex flex-shrink-0">
-          <Sidebar activeSection={activeSection} onSectionChange={requestSectionChange} />
+          <Sidebar activeSection={activeSection} onSectionChange={requestSectionChange} onHoverPreview={setHoverPreview} />
         </div>
 
         {/* Content area fills remaining space */}
@@ -309,8 +309,6 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
         </div>
       </motion.div>
 
-      {/* Keyboard hint */}
-      <KeyboardHint />
     </div>
   );
 }
