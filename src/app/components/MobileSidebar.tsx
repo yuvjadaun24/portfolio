@@ -65,8 +65,8 @@ function IconSignal({ className }: { className?: string }) {
 }
 
 const menuItems: { id: Section; icon: typeof IconRadar; label: string }[] = [
-  { id: 'projects', icon: IconRadar, label: 'HUB' },
   { id: 'about', icon: IconFingerprint, label: 'INTEL' },
+  { id: 'projects', icon: IconRadar, label: 'HUB' },
   { id: 'skills', icon: IconChip, label: 'WORK' },
   { id: 'contact', icon: IconSignal, label: 'COMMS' },
 ];

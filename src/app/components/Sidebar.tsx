@@ -12,8 +12,8 @@ interface SidebarProps {
 
 /* ── menu data ─────────────────────────────────────────── */
 const menuItems: { id: Section; num: string; label: string; uplink: string }[] = [
-  { id: 'projects', num: '01', label: 'DASHBOARD', uplink: 'DASHBOARD_MAIN' },
-  { id: 'about', num: '02', label: 'AGENT_PROFILE', uplink: 'AGENT_DOSSIER' },
+  { id: 'about', num: '01', label: 'AGENT_PROFILE', uplink: 'AGENT_DOSSIER' },
+  { id: 'projects', num: '02', label: 'DASHBOARD', uplink: 'DASHBOARD_MAIN' },
   { id: 'skills', num: '03', label: 'DIAGNOSTICS', uplink: 'SYS_DIAGNOSTICS' },
   { id: 'contact', num: '04', label: 'UPLINK', uplink: 'CONTACT_UPLINK' },
 ];

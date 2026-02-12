@@ -101,7 +101,7 @@ function moveFocusDirectional(root: HTMLElement | null, direction: Direction) {
   }
 }
 
-export default function MainLayout({ initialSection = 'projects' }: { initialSection?: Section }) {
+export default function MainLayout({ initialSection = 'about' }: { initialSection?: Section }) {
   const [activeSection, setActiveSection] = useState<Section>(initialSection);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
@@ -110,7 +110,7 @@ export default function MainLayout({ initialSection = 'projects' }: { initialSec
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  const sections: Section[] = useMemo(() => ['projects', 'about', 'skills', 'contact'], []);
+  const sections: Section[] = useMemo(() => ['about', 'projects', 'skills', 'contact'], []);
 
   const requestSectionChange = (next: Section) => {
     if (next === activeSection) return;

@@ -5,7 +5,7 @@ import type { Section } from './components/Sidebar';
 
 export default function App() {
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [initialSection] = useState<Section>('projects');
+  const [initialSection] = useState<Section>('about');
 
   return (
     <div className="w-full h-full">
