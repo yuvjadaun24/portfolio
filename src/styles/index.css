@@ -1,5 +1,51 @@
-@import './fonts.css';
-@import 'lenis/dist/lenis.css';
-@import './tailwind.css';
-@import './theme.css';
-@import './retro.css';
+﻿@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Space+Mono:wght@400;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #f0ede8;
+  --black: #0a0a0a;
+  --dark: #1a1a1a;
+  --white: #f0ede8;
+  --gray: #888;
+  --border: rgba(0,0,0,0.12);
+  --border-light: rgba(255,255,255,0.08);
+  /* fonts */
+  --display: 'Anton', sans-serif;
+  --serif: 'Playfair Display', serif;
+  --mono: 'Space Mono', monospace;
+}
+
+html { background: var(--cream); color: var(--black); }
+body { font-family: var(--mono); overflow-x: hidden; cursor: none; }
+* { cursor: none !important; }
+::-webkit-scrollbar { width: 0; }
+
+/* Lenis */
+html.lenis { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@media (max-width: 860px) {
+  .nav-links { display: none !important; }
+  .nav-email { display: none !important; }
+}
+@media (min-width: 861px) {
+  .hamburger { display: none !important; }
+}
+@media (max-width: 900px) {
+  .works-split { grid-template-columns: 1fr !important; }
+  .works-split > div:first-child { position: relative !important; height: auto !important; }
+}
+@media (max-width: 768px) {
+  .about-cols { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; }
+  .featured-grid { grid-template-columns: 1fr !important; }
+  .about-photos { height: auto !important; }
+}
+
+@media (pointer: coarse) {
+  body, * { cursor: auto !important; }
+  .cursor-blob { display: none !important; }
+}
