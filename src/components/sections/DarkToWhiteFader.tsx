@@ -50,71 +50,79 @@ export default function DarkToWhiteFader() {
   const photosRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let rafId: number;
+    let cancelled = false;
     let ctx: ReturnType<typeof gsap.context>;
 
-    // Delay one rAF so HeroPinned's async setup (rAF + fonts.ready) can register
-    // its 500vh pin spacer first. Without this, DarkToWhiteFader calculates its
-    // start position as ~100vh (wrong) instead of ~600vh (correct), causing it to
-    // pin mid-hero and render on top of the hero section.
-    rafId = requestAnimationFrame(() => {
-      ctx = gsap.context(() => {
-        const photos = photosRef.current
-          ? Array.from(photosRef.current.children) as HTMLElement[]
-          : [];
+    // Wait for fonts AND one rAF — same timing strategy as HeroPinned.
+    // HeroPinned uses rAF + fonts.ready + ScrollTrigger.refresh(), so we must
+    // wait at least as long before measuring our position, otherwise we'll
+    // register our pin before HeroPinned's 500vh spacer exists.
+    const rafId = requestAnimationFrame(() => {
+      document.fonts.ready.then(() => {
+        if (cancelled) return;
+        // One more rAF to let HeroPinned's ScrollTrigger.refresh() finish
+        requestAnimationFrame(() => {
+          if (cancelled) return;
+          ctx = gsap.context(() => {
+            const photos = photosRef.current
+              ? Array.from(photosRef.current.children) as HTMLElement[]
+              : [];
 
-        // Hide photos immediately so they don't flash before the timeline takes over
-        gsap.set(photos, { opacity: 0 });
+            // Hide photos immediately so they don't flash before the timeline takes over
+            gsap.set(photos, { opacity: 0 });
 
-        const tl = gsap.timeline();
+            const tl = gsap.timeline();
 
-        // ─── Phase 1 (0→30%): list rows fully visible, bg stays black ────────
-        // implicit hold — no tweens fire until 0.30
+            // ─── Phase 1 (0→30%): list rows fully visible, bg stays black ────────
+            // implicit hold — no tweens fire until 0.30
 
-        // ─── Phase 2 (30→50%): list rows fade out, bg starts warming ─────────
-        tl.to(listRef.current, { opacity: 0, y: -20, duration: 0.20, ease: 'power2.in' }, 0.30);
-        tl.to(fillRef.current, { backgroundColor: '#1a1a1a', duration: 0.10, ease: 'none' }, 0.30);
-        tl.to(fillRef.current, { backgroundColor: '#2e2e2e', duration: 0.10, ease: 'none' }, 0.40);
+            // ─── Phase 2 (30→50%): list rows fade out, bg starts warming ─────────
+            tl.to(listRef.current, { opacity: 0, y: -20, duration: 0.20, ease: 'power2.in' }, 0.30);
+            tl.to(fillRef.current, { backgroundColor: '#1a1a1a', duration: 0.10, ease: 'none' }, 0.30);
+            tl.to(fillRef.current, { backgroundColor: '#2e2e2e', duration: 0.10, ease: 'none' }, 0.40);
 
-        // ─── Phase 3 (50→75%): bg transitions to cream ───────────────────────
-        tl.to(fillRef.current, { backgroundColor: '#c8c4bf', duration: 0.15, ease: 'power1.out' }, 0.50);
-        tl.to(fillRef.current, { backgroundColor: '#f0ede8', duration: 0.10, ease: 'power2.out' }, 0.65);
+            // ─── Phase 3 (50→75%): bg transitions to cream ───────────────────────
+            tl.to(fillRef.current, { backgroundColor: '#c8c4bf', duration: 0.15, ease: 'power1.out' }, 0.50);
+            tl.to(fillRef.current, { backgroundColor: '#f0ede8', duration: 0.10, ease: 'power2.out' }, 0.65);
 
-        // ─── Phase 4 (55→90%): photos rise in (fromTo = GSAP owns full from→to) ──
-        photos.forEach((photo, i) => {
-          tl.fromTo(
-            photo,
-            { y: 55, opacity: 0, rotation: PHOTOS[i].rotation },
-            { y: 0, opacity: 1, rotation: PHOTOS[i].rotation, duration: 0.25, ease: 'expo.out' },
-            0.55 + i * 0.08,
-          );
-        });
+            // ─── Phase 4 (55→90%): photos rise in (fromTo = GSAP owns full from→to) ──
+            photos.forEach((photo, i) => {
+              tl.fromTo(
+                photo,
+                { y: 55, opacity: 0, rotation: PHOTOS[i].rotation },
+                { y: 0, opacity: 1, rotation: PHOTOS[i].rotation, duration: 0.25, ease: 'expo.out' },
+                0.55 + i * 0.08,
+              );
+            });
 
-        ScrollTrigger.create({
-          trigger: wrapRef.current,
-          start: 'top top',
-          end: '+=400%',
-          pin: true,
-          anticipatePin: 1,
-          scrub: 1.2,
-          animation: tl,
-          // Re-measure position on every refresh so hero's pin spacer is accounted for
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const nav = document.querySelector('.navbar') as HTMLElement;
-            if (!nav) return;
-            if (self.progress < 0.55) {
-              nav.classList.add('dark');
-              nav.classList.remove('scrolled');
-            } else {
-              nav.classList.remove('dark');
-            }
-          },
-        });
-      });
-    });
+            ScrollTrigger.create({
+              trigger: wrapRef.current,
+              start: 'top top',
+              end: '+=400%',
+              pin: true,
+              anticipatePin: 1,
+              scrub: 1.2,
+              animation: tl,
+              // Re-measure position on every refresh so hero's pin spacer is accounted for
+              invalidateOnRefresh: true,
+              onUpdate: (self) => {
+                const nav = document.querySelector('.navbar') as HTMLElement;
+                if (!nav) return;
+                if (self.progress < 0.55) {
+                  nav.classList.add('dark');
+                  nav.classList.remove('scrolled');
+                } else {
+                  nav.classList.remove('dark');
+                }
+              },
+            });
+          }); // gsap.context
+        }); // inner rAF
+      }); // fonts.ready
+    }); // outer rAF
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(rafId);
       ctx?.revert();
     };

@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect, Suspense, lazy } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SplineSafe from '@/components/SplineSafe';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const Spline = lazy(() => import('@splinetool/react-spline'));
 
 type Step = 'init' | 'name' | 'email' | 'type' | 'note' | 'done';
 type Message = { from: 'bot' | 'user'; text: string };
@@ -212,9 +211,7 @@ export default function Contact() {
       {/* RIGHT — vortex */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
         <div style={{ width: '52vmin', height: '52vmin' }}>
-          <Suspense fallback={null}>
-            <Spline scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
-          </Suspense>
+          <SplineSafe scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
         </div>
       </div>
 

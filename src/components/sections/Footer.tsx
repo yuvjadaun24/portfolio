@@ -1,10 +1,9 @@
-import { Suspense, lazy, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SplineSafe from '@/components/SplineSafe';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const Spline = lazy(() => import('@splinetool/react-spline'));
 
 const socials = [
   { label: 'LinkedIn', href: 'https://linkedin.com/in/yuvrajsinghjadaun' },
@@ -63,9 +62,7 @@ export default function Footer() {
         {/* Center — vortex */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: '38vmin', height: '38vmin' }}>
-            <Suspense fallback={null}>
-              <Spline scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
-            </Suspense>
+            <SplineSafe scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
           </div>
         </div>
 

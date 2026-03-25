@@ -1,11 +1,10 @@
-import { useEffect, useRef, Suspense, lazy } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import SplineSafe from '@/components/SplineSafe';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
-
-const Spline = lazy(() => import('@splinetool/react-spline'));
 
 // Project thumbnail images for the tray
 const TRAY_IMAGES = [
@@ -190,9 +189,7 @@ export default function HeroPinned() {
             pointerEvents: 'none',
           }}
         >
-          <Suspense fallback={null}>
-            <Spline scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
-          </Suspense>
+          <SplineSafe scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
         </div>
 
         {/* Tagline — appears in Phase 3; lines revealed via SplitText */}
@@ -262,7 +259,7 @@ export default function HeroPinned() {
       >
         <h1 style={{
           fontFamily: 'var(--display)',
-          fontSize: 'clamp(80px, 13vw, 190px)',
+          fontSize: 'clamp(60px, 10vw, 190px)',
           lineHeight: 0.90,
           color: 'var(--black)',
           letterSpacing: '-0.01em',

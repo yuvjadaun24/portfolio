@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { scrollVelocityProxy, initScrollVelocity } from '../utils/scrollVelocity';
@@ -67,15 +67,80 @@ interface ShaderFrameProps {
   src: string;
 }
 
+/** Returns true if WebGL is available in this browser/environment */
+function isWebGLAvailable(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function ShaderFrame({ src }: ShaderFrameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  // Stable check: computed once on first render, never changes
+  const [webglSupported] = useState<boolean>(() => isWebGLAvailable());
 
+  // useEffect is always called (Rules of Hooks) — guards inside skip work if WebGL is off
   useEffect(() => {
+    if (!webglSupported) return;
     const container = containerRef.current;
     if (!container) return;
 
+    // Only create the WebGL renderer when this card is actually visible.
+    // This keeps the active context count low so Spline can get a slot too.
+    let cleanup: (() => void) | undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !cleanup) {
+          cleanup = startRenderer(container, src);
+        } else if (!entry.isIntersecting && cleanup) {
+          cleanup();
+          cleanup = undefined;
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    io.observe(container);
+    return () => {
+      io.disconnect();
+      cleanup?.();
+    };
+  }, [src, webglSupported]);
+
+  if (!webglSupported) {
+    return (
+      <img
+        src={src}
+        alt=""
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+    />
+  );
+}
+
+/** Creates + starts the Three.js renderer; returns a cleanup fn. */
+function startRenderer(container: HTMLDivElement, src: string): (() => void) | undefined {
+
     // ── Renderer ──
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch {
+      // WebGL creation failed at runtime — bail out silently
+      return;
+    }
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio ?? 1, 2));
 
@@ -140,7 +205,6 @@ export default function ShaderFrame({ src }: ShaderFrameProps) {
     const tick = (now: number) => {
       const dt = (now - last) * 0.001;
       last = now;
-      (uniforms.uTime.value as number);
       uniforms.uTime.value = (uniforms.uTime.value as number) + dt;
       uniforms.uScrollVelocity.value  = scrollVelocityProxy.v;
       uniforms.uVelocityStrength.value = scrollVelocityProxy.s;
@@ -148,21 +212,13 @@ export default function ShaderFrame({ src }: ShaderFrameProps) {
     };
     gsap.ticker.add(tick);
 
-    // ── Cleanup ──
-    return () => {
-      gsap.ticker.remove(tick);
-      ro.disconnect();
-      if (container.contains(canvas)) container.removeChild(canvas);
-      renderer.dispose();
-      mat.dispose();
-      geom.dispose();
-    };
-  }, [src]);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-    />
-  );
+  // ── Cleanup ──
+  return () => {
+    gsap.ticker.remove(tick);
+    ro.disconnect();
+    if (container.contains(canvas)) container.removeChild(canvas);
+    renderer.dispose();
+    mat.dispose();
+    geom.dispose();
+  };
 }

@@ -1,10 +1,9 @@
-import { useEffect, useRef, Suspense, lazy } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SplineSafe from '@/components/SplineSafe';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const Spline = lazy(() => import('@splinetool/react-spline'));
 
 export default function WhiteToBlackTransition() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -79,9 +78,7 @@ export default function WhiteToBlackTransition() {
           width: '60vmin', height: '60vmin',
           pointerEvents: 'none',
         }}>
-          <Suspense fallback={null}>
-            <Spline scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
-          </Suspense>
+          <SplineSafe scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
         </div>
       </div>
     </div>
