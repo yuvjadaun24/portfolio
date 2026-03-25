@@ -2,55 +2,17 @@ import { useEffect, useRef } from 'react';
 import type React from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
 import ShaderFrame from '../ShaderFrame';
+import { PROJECTS } from '@/data/projects';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const PROJECTS = [
-  {
-    id: 1,
-    year: '2024–Present',
-    client: 'AI/ML Course Platform',
-    desc: 'Delivered a WCAG-aligned, responsive experience that boosted engagement 45% and retention 30% through A/B-tested UX iterations.',
-    tags: ['User Research', 'A/B Testing'],
-    link: '#',
-    image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=85',
-  },
-  {
-    id: 2,
-    year: '2021–2023',
-    client: 'FinTech Payment Gateway',
-    desc: 'Unified POS, web, and Android into one design language. Reduced bounce rates 25% with heuristic evaluation across 6 platforms.',
-    tags: ['Product Design', 'Design Systems'],
-    link: '#',
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=85',
-  },
-  {
-    id: 3,
-    year: '2024–Present',
-    client: 'Dashboard Modernisation',
-    desc: 'Modernised 8 dashboards with iterative feedback loops — 35% higher engagement and 40% surge in mobile usage.',
-    tags: ['Figma', 'Prototyping'],
-    link: '#',
-    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&q=85',
-  },
-  {
-    id: 4,
-    year: '2021–2023',
-    client: 'Responsive Web & Tablet',
-    desc: 'Delivered 12 high-fidelity screens across desktop and tablet, validated through 50+ participant usability studies.',
-    tags: ['Interaction Design', 'Usability'],
-    link: '#',
-    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1200&q=85',
-  },
-];
-
-// Explicit bento placement for each of the 4 cards
+// Explicit bento placement for 3 cards
 const BENTO_PLACEMENT: React.CSSProperties[] = [
-  { gridColumn: '1 / 3', gridRow: '1 / 2' }, // large wide
-  { gridColumn: '3 / 4', gridRow: '1 / 3' }, // tall (spans both rows)
-  { gridColumn: '1 / 2', gridRow: '2 / 3' }, // small
-  { gridColumn: '2 / 3', gridRow: '2 / 3' }, // small
+  { gridColumn: '1 / 3', gridRow: '1 / 2' }, // wide left
+  { gridColumn: '3 / 4', gridRow: '1 / 2' }, // tall right
+  { gridColumn: '1 / 4', gridRow: '2 / 3' }, // full-width bottom
 ];
 
 
@@ -167,7 +129,7 @@ function BentoCard({ project }: { project: (typeof PROJECTS)[0] }) {
             <p style={{
               fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em',
               color: 'rgba(255,255,255,0.4)', marginBottom: 5, textTransform: 'uppercase',
-            }}>{project.client}</p>
+            }}>{project.title}</p>
             <p style={{
               fontFamily: 'var(--serif)', fontSize: 'clamp(13px, 1vw, 18px)',
               lineHeight: 1.3, color: '#fff', fontWeight: 400,
@@ -175,8 +137,8 @@ function BentoCard({ project }: { project: (typeof PROJECTS)[0] }) {
               WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
             }}>{project.desc}</p>
           </div>
-          <a
-            href={project.link}
+          <Link
+            to={`/case-study/${project.id}`}
             style={{
               width: 40, height: 40, borderRadius: '50%',
               background: '#fff', color: '#000',
@@ -186,7 +148,7 @@ function BentoCard({ project }: { project: (typeof PROJECTS)[0] }) {
             }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.75)'; e.currentTarget.style.transform = 'scale(1.12)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'scale(1)'; }}
-          >↗</a>
+          >↗</Link>
         </div>
       </div>
 
@@ -268,7 +230,7 @@ export default function Works() {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gridTemplateRows: '54vh 40vh',
+          gridTemplateRows: '54vh 36vh',
           gap: '10px',
           padding: '10px 4vw 0',
         }}

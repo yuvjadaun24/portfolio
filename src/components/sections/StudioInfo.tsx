@@ -123,11 +123,11 @@ export default function StudioInfo() {
             fontFamily: 'var(--mono)', fontSize: 12, lineHeight: 1.7,
             color: 'rgba(0,0,0,0.5)',
           }}>
-            45% engagement uplift · 30% retention growth · 95% client satisfaction · 90% on-time delivery across 7+ projects.
+            45% engagement uplift · 30% retention growth · 95% client satisfaction · 90% on-time delivery across 10+ projects.
           </p>
           <a
             className="reel-text-item"
-            href="/resume.pdf"
+            href="/Yuvraj_Singh_Jadaun_Resume_UI_UX.pdf"
             target="_blank"
             rel="noopener noreferrer"
             style={{

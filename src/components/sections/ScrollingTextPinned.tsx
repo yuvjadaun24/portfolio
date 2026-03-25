@@ -18,7 +18,7 @@ export default function ScrollingTextPinned() {
         scrollTrigger: {
           trigger: wrapRef.current,
           start: 'top top',
-          end: '+=350%',
+          end: '+=150%',
           pin: true,
           anticipatePin: 1,
           scrub: 0.8,

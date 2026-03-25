@@ -32,24 +32,12 @@ export default function HeroPinned() {
   useEffect(() => {
     if (!wrapperRef.current || !overlayRef.current || !anchorRef.current) return;
 
-    let cancelled = false;
-    let rafId: number;
-    // Track the one ScrollTrigger we create so cleanup is scoped
-    let st: ReturnType<typeof ScrollTrigger.create> | null = null;
-    let tl: gsap.core.Timeline | null = null;
-
-    rafId = requestAnimationFrame(() => {
-      if (cancelled) return;
-
-      document.fonts.ready.then(() => {
-        if (cancelled) return;
-        if (!wrapperRef.current || !overlayRef.current || !anchorRef.current) return;
-
+    const ctx = gsap.context(() => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      // 1. Measure the inline anchor position
-      const rect = anchorRef.current.getBoundingClientRect();
+      // 1. Measure the inline anchor position (fonts already loaded by SmoothScrollProvider)
+      const rect = anchorRef.current!.getBoundingClientRect();
       const iTop = (rect.top / vh) * 100;
       const iRight = ((vw - rect.right) / vw) * 100;
       const iBottom = ((vh - rect.bottom) / vh) * 100;
@@ -81,31 +69,31 @@ export default function HeroPinned() {
       }
 
       // Pre-calculate final row metrics — tiles span full viewport width
-      const gap = 8;
+      const gap = 100;
       const tileW = Math.floor((vw - gap * 7) / 8);
       const tileH = tileW;
       const totalW = tileW * 8 + gap * 7;
       const rowStartX = Math.floor((vw - totalW) / 2);
       const finalRowY = vh / 2 - tileH / 2 - 4;
 
-      // Initial tile positions: above viewport at final column x
+      // Initial tile positions: above viewport at final column x, scaled up
       trayRefs.current.forEach((el, i) => {
         if (!el) return;
         const finalX = rowStartX + i * (tileW + gap) - vw / 2 + tileW / 2;
-        gsap.set(el, { x: finalX, y: -(vh * 0.7), opacity: 0, scale: 1, width: tileW, height: tileH });
+        gsap.set(el, { x: finalX, y: -(vh * 0.7), opacity: 0, scale: 2.5, width: tileW, height: tileH });
       });
 
       // 4. Build the master timeline
-      tl = gsap.timeline({ defaults: { ease: 'none' } });
+      const tl = gsap.timeline({ defaults: { ease: 'none' } });
 
       // Phase 1 (0→35%): expand clip-path, fade heading/desc
       tl.to(overlayRef.current, { clipPath: 'inset(0% 0% 0% 0% round 0px)', duration: 0.35 }, 0);
       tl.to([headingRef.current, descRef.current], { opacity: 0, duration: 0.2 }, 0.05);
 
-      // Phase 3 (52%→76%): images fall in
+      // Phase 3 (52%→76%): images fall in and shrink to final size
       trayRefs.current.forEach((el, i) => {
         if (!el) return;
-        tl!.to(el, { y: finalRowY, opacity: 1, duration: 0.10, ease: 'expo.out' }, 0.52 + i * 0.02);
+        tl.to(el, { y: finalRowY, opacity: 1, scale: 1, duration: 0.10, ease: 'expo.out' }, 0.52 + i * 0.02);
       });
 
       // Phase 3 cont (64%→79%): tagline lines reveal
@@ -119,14 +107,14 @@ export default function HeroPinned() {
       tl.to(taglineRef.current, { opacity: 0, y: -30, duration: 0.06, ease: 'power2.in' }, 0.82);
       trayRefs.current.forEach((el, i) => {
         if (!el) return;
-        tl!.to(el, { y: exitY, opacity: 0, duration: 0.06, ease: 'power2.in' }, 0.82 + i * 0.01);
+        tl.to(el, { y: exitY, opacity: 0, duration: 0.06, ease: 'power2.in' }, 0.82 + i * 0.01);
       });
 
       // Phase 5 (93%→100%): vortex fades
       tl.to(splineRef.current, { opacity: 0, scale: 0.92, duration: 0.07, ease: 'power2.inOut' }, 0.90);
 
       // 5. Pin with ScrollTrigger
-      st = ScrollTrigger.create({
+      ScrollTrigger.create({
         trigger: wrapperRef.current,
         scroller: window,
         start: 'top top',
@@ -141,19 +129,9 @@ export default function HeroPinned() {
           else nav.classList.remove('dark');
         },
       });
+    }, wrapperRef);
 
-      // Refresh so Lenis scrollerProxy positions are recalculated
-      ScrollTrigger.refresh();
-
-      }); // document.fonts.ready
-    }); // requestAnimationFrame
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(rafId);
-      tl?.kill();
-      st?.kill();
-    };
+    return () => ctx.revert();
   }, []);
 
   return (

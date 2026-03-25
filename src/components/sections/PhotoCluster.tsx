@@ -3,7 +3,7 @@ import gsap from 'gsap';
 
 const PHOTOS = [
   {
-    src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+    src: '/images/About-me-1.jpg',
     style: {
       left: '6%', top: '20%',
       width: 'clamp(240px,22vw,340px)',
@@ -12,7 +12,7 @@ const PHOTOS = [
     } as React.CSSProperties,
   },
   {
-    src: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&q=80',
+    src: '/images/About-me-2.jpg',
     style: {
       left: '32%', top: '10%',
       width: 'clamp(340px,33vw,500px)',
@@ -21,7 +21,7 @@ const PHOTOS = [
     } as React.CSSProperties,
   },
   {
-    src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80',
+    src: '/images/About-me-3.jpg',
     style: {
       right: '4%', top: '48%',
       width: 'clamp(280px,24vw,360px)',

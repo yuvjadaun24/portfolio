@@ -11,23 +11,20 @@ export default function WhiteToBlackTransition() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Start: invisible small rectangle
+      // Start: tiny rectangle at dead center
       gsap.set(overlayRef.current, {
-        clipPath: 'inset(35% 30% 35% 30% round 4px)',
-        opacity: 0,
+        scale: 0,
+        transformOrigin: '50% 50%',
+        opacity: 1,
       });
 
-      // Timeline: phase 1 = fade in (0→20%), phase 2 = expand clip-path (20→100%)
       const tl = gsap.timeline();
+
+      // Expand from center to full screen
       tl.to(overlayRef.current, {
-        opacity: 1,
-        duration: 0.20,
-        ease: 'power2.out',
-      });
-      tl.to(overlayRef.current, {
-        clipPath: 'inset(0% 0% 0% 0% round 0px)',
+        scale: 1,
         ease: 'power2.inOut',
-        duration: 0.80,
+        duration: 1,
       });
 
       ScrollTrigger.create({
@@ -67,7 +64,7 @@ export default function WhiteToBlackTransition() {
         style={{
           position: 'absolute', inset: 0,
           background: 'var(--black)',
-          willChange: 'clip-path',
+          willChange: 'transform',
         }}
       >
         {/* Spline vortex — always centered inside the overlay */}

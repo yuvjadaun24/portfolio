@@ -1,17 +1,10 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
+import { PROJECTS } from '@/data/projects';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const LIST_PROJECTS = [
-  { name: 'WCAG Design System',    year: '2023', tags: ['USER RESEARCH', 'WCAG'] },
-  { name: 'Mobile UX Sprint',      year: '2023', tags: ['FIGMA', 'PROTOTYPING'] },
-  { name: 'E-commerce Redesign',   year: '2022', tags: ['UX/UI', 'USABILITY'] },
-  { name: 'SaaS Onboarding Flow',  year: '2022', tags: ['INTERACTION', 'FIGMA'] },
-  { name: 'Brand Identity System', year: '2021', tags: ['DESIGN SYSTEMS', 'FIGMA'] },
-  { name: 'Analytics Dashboard',   year: '2021', tags: ['DATA VIZ', 'PROTOTYPING'] },
-];
 
 export default function WorksListTable() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -28,8 +21,9 @@ export default function WorksListTable() {
 
   return (
     <div ref={sectionRef} style={{ background: 'var(--dark)', paddingBottom: '4vh' }}>
-      {LIST_PROJECTS.map((p, i) => (
-        <div
+      {PROJECTS.map((p, i) => (
+        <Link
+          to={`/case-study/${p.id}`}
           key={i}
           className="wlt-row"
           style={{
@@ -41,6 +35,7 @@ export default function WorksListTable() {
             borderBottom: '1px solid rgba(255,255,255,0.07)',
             gap: '4vw',
             transition: 'background 0.3s',
+            textDecoration: 'none',
           }}
           onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -48,7 +43,7 @@ export default function WorksListTable() {
           <span style={{
             fontFamily: 'var(--serif)', fontSize: 'clamp(14px,1.4vw,20px)',
             fontWeight: 500, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.01em',
-          }}>{p.name}</span>
+          }}>{p.title}</span>
           <span style={{
             fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.2em',
             color: 'rgba(255,255,255,0.3)',
@@ -61,7 +56,7 @@ export default function WorksListTable() {
               }}>{t}</span>
             ))}
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

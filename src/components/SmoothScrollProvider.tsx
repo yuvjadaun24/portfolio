@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -6,6 +6,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScrollProvider({ children }: { children: ReactNode }) {
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     // Ensure we always start at the very top regardless of browser scroll memory
     window.scrollTo(0, 0);
@@ -28,11 +30,18 @@ export default function SmoothScrollProvider({ children }: { children: ReactNode
     const tick = (t: number) => lenis.raf(t * 1000);
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
-    // Let ScrollTrigger know the proxy is ready, then re-snap to top
-    ScrollTrigger.refresh();
-    requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-      lenis.scrollTo(0, { immediate: true });
+
+    // Wait for fonts BEFORE rendering sections so every ScrollTrigger is
+    // created synchronously in DOM order — no more race conditions.
+    document.fonts.ready.then(() => {
+      setReady(true);
+      // After React renders all sections and their useEffects fire (creating
+      // ScrollTriggers in DOM order), refresh once to calculate correct positions.
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+        window.scrollTo(0, 0);
+        lenis.scrollTo(0, { immediate: true });
+      });
     });
 
     return () => {
@@ -41,5 +50,7 @@ export default function SmoothScrollProvider({ children }: { children: ReactNode
     };
   }, []);
 
-  return <>{children}</>;
+  // Don't render children until fonts are loaded — all ScrollTrigger pins
+  // will then be created synchronously in the correct DOM order.
+  return <>{ready ? children : null}</>;
 }
