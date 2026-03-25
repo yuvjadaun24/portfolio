@@ -91,7 +91,7 @@ function TiltPhoto({ src, style }: { src: string; style: React.CSSProperties }) 
 export default function PhotoCluster() {
   return (
     <section
-      id="about"
+      id="photos"
       style={{
         position: 'relative', height: '115vh',
         background: 'var(--cream)', overflow: 'hidden',

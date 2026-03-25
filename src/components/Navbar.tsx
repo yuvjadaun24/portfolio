@@ -7,9 +7,16 @@ gsap.registerPlugin(ScrollTrigger);
 const NAV_LINKS = [
   { label: 'Works', href: '#works' },
   { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
   { label: 'Contact', href: '#contact' },
 ];
+
+function smoothScrollTo(href: string) {
+  const id = href.replace('#', '');
+  const el = document.getElementById(id);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY;
+  window.scrollTo({ top, behavior: 'smooth' });
+}
 
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
@@ -92,6 +99,7 @@ export default function Navbar() {
             <a
               key={l.href}
               href={l.href}
+              onClick={(e) => { e.preventDefault(); smoothScrollTo(l.href); }}
               className="nav-cell"
               onMouseEnter={() => setHovered(l.href)}
               onMouseLeave={() => setHovered(null)}
@@ -176,7 +184,7 @@ export default function Navbar() {
         transition: 'opacity 0.4s',
       }}>
         {NAV_LINKS.map(l => (
-          <a key={l.href} href={l.href} onClick={() => setMobileOpen(false)} style={{
+          <a key={l.href} href={l.href} onClick={(e) => { e.preventDefault(); setMobileOpen(false); smoothScrollTo(l.href); }} style={{
             fontFamily: 'var(--display)', fontSize: '15vw', letterSpacing: '0.04em',
             textDecoration: 'none', color: 'var(--white)',
           }}>{l.label}</a>

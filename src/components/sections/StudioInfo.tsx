@@ -66,6 +66,7 @@ export default function StudioInfo() {
   return (
     <section
       ref={sectionRef}
+      id="about"
       className="reel-grid"
       style={{
         background: 'var(--cream)',
