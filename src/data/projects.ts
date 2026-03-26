@@ -6,6 +6,8 @@ export interface Project {
   desc: string;
   image: string;
   images?: string[];
+  snapshots?: string[];
+  hero?: string;
   domain: string;
   overview: string;
   problem: string;
@@ -29,6 +31,7 @@ export const PROJECTS: Project[] = [
       '/images/Aifinite-image/Aifinite-3.png',
       '/images/Aifinite-image/Aifinite-4.png',
     ],
+    snapshots: ['/images/Aifinite Snapsho.png'],
     domain: 'EdTech / AI & Data Science Platform',
     overview:
       'A futuristic, immersive web platform designed to gateway students into AI and Data Science excellence through structured courses and interactive learning.',
@@ -76,6 +79,7 @@ export const PROJECTS: Project[] = [
       '/images/Arogya-images/Arogya-4.png',
       '/images/Arogya-images/Arogya-5.png',
     ],
+    snapshots: ['/images/Arogya-Snapshot.png'],
     domain: 'Healthcare Tech / Patient Record Management',
     overview:
       'A secure, patient-centric healthcare application that simplifies medical records, provides instant care access, and incentivizes health data management.',
@@ -122,6 +126,7 @@ export const PROJECTS: Project[] = [
       '/images/parktek-images/Parktek-3.png',
       '/images/parktek-images/Parktek-4.png',
     ],
+    snapshots: ['/images/Parktek Snapshot.png'],
     domain: 'Smart Infrastructure / B2B SaaS',
     overview:
       'A comprehensive smart parking ecosystem integrating AI-powered ANPR, smart registration, and professional fleet management into one seamless platform.',
@@ -168,6 +173,19 @@ export const PROJECTS: Project[] = [
       '/images/Aspedan-images/Aspedan-4.png',
       '/images/Aspedan-images/Aspedan-5.png',
     ],
+    snapshots: [
+      '/images/Aspedan Snapshots/Home Screen.png',
+      '/images/Aspedan Snapshots/Onboarding 1.png',
+      '/images/Aspedan Snapshots/Profile.png',
+      '/images/Aspedan Snapshots/Family Sharing.png',
+      '/images/Aspedan Snapshots/My Stats.png',
+      '/images/Aspedan Snapshots/My Stats-1.png',
+      '/images/Aspedan Snapshots/Blood Pressure.png',
+      '/images/Aspedan Snapshots/Blood Testing Screen.png',
+      '/images/Aspedan Snapshots/Weight Sync Screen.png',
+      '/images/Aspedan Snapshots/SW & Data Sync.png',
+      '/images/Aspedan Snapshots/Health Plan Response.png',
+    ],
     domain: 'Healthcare AI / Conversational Health Assistant',
     overview:
       'Aspedan is a smart AI health assistant mobile app that puts a personal healthcare companion in your pocket. It enables users to log symptoms, chat with an AI bot for instant health guidance, monitor vitals, and receive proactive wellness recommendations — all through an intuitive, approachable interface.',
@@ -200,5 +218,38 @@ export const PROJECTS: Project[] = [
     designHighlights:
       'Warm, calming colour system with soft gradients; conversational UI patterns with chat bubbles and typing indicators; card-based health summaries using accessible typography; rounded, touch-optimised components that feel safe and approachable on mobile.',
     palette: ['#f0f4ff', '#6366f1', '#a5b4fc', '#1e1b4b', '#ffffff'],
+  },
+  {
+    id: 'techcompiler',
+    title: 'Techcompiler Datasystems',
+    year: '2024',
+    tags: ['Company Profile', 'Landing Page', 'B2B'],
+    desc: 'A modern company profile landing page for Techcompiler Datasystems, showcasing services, case studies, and enterprise capabilities.',
+    image: '/images/Tehcompiler-Images/Techcompiler-1.png',
+    images: [
+      '/images/Tehcompiler-Images/Techcompiler-1.png',
+      '/images/Tehcompiler-Images/Techcompiler-2.png',
+      '/images/Tehcompiler-Images/Techcompiler-3.png',
+      '/images/Tehcompiler-Images/Techcompiler-4.png',
+      '/images/Tehcompiler-Images/Techcompiler-5.png',
+    ],
+    hero: '/images/Tehcompiler-Images/Techcompiler-2.png',
+    snapshots: ['/images/Techcompiler Snapshot.png'],
+    domain: 'Corporate / B2B Web Presence',
+    overview:
+      'A clean, trust-forward landing experience presenting Techcompiler Datasystems as a capable engineering partner for enterprise software and infrastructure projects. The design highlights services, case studies, and contact flows to drive qualified leads.',
+    problem:
+      'Techcompiler needed a concise, credible web presence that communicates technical capability without overwhelming non-technical decision makers. Their previous site lacked hierarchy and clarity for enterprise decision paths.',
+    solution:
+      'Crafted a minimal, content-forward landing page with clear service buckets, prominent case studies, and an actionable contact flow. Visuals emphasize reliability and scale using a calm, technical palette and modular content blocks.',
+    features: [
+      { title: 'Service Modules', description: 'Clear, scannable sections that explain offerings (Cloud, Data, Embedded Systems).' },
+      { title: 'Case Study Highlights', description: 'Concise case study cards with measurable outcomes and quick read summaries.' },
+      { title: 'Lead Capture Flow', description: 'Short, progressive contact form designed to qualify enterprise interest.' },
+      { title: 'Technical Credentials', description: 'Trust badges, partner logos, and technology stack visualisations to build confidence.' },
+    ],
+    designHighlights:
+      'Modular content blocks, restrained typography, and a calm technical palette focused on clarity and calling attention to outcomes.',
+    palette: ['#0b1220', '#0ea5e9', '#e6f6ff', '#ffffff', '#0c4a6e'],
   },
 ];

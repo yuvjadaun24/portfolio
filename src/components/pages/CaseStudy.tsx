@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -13,6 +13,9 @@ export default function CaseStudy() {
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const [snapshotOpen, setSnapshotOpen] = useState(false);
+  const [snapshotMode, setSnapshotMode] = useState<'vertical' | 'horizontal'>('vertical');
+  const [snapshotIndex, setSnapshotIndex] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -59,6 +62,40 @@ export default function CaseStudy() {
     return () => ctx.revert();
   }, [project]);
 
+  useEffect(() => {
+    if (!snapshotOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSnapshotOpen(false);
+      if (e.key === 'ArrowRight') setSnapshotIndex(i => i + 1);
+      if (e.key === 'ArrowLeft') setSnapshotIndex(i => Math.max(0, i - 1));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [snapshotOpen]);
+
+  // Lock background scrolling when snapshot modal is open using overflow:hidden
+  useEffect(() => {
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevDocOverflow = document.documentElement.style.overflow;
+    const prevBodyTouch = document.body.style.touchAction;
+    if (snapshotOpen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      document.body.style.overscrollBehavior = 'none';
+    } else {
+      document.body.style.overflow = prevBodyOverflow || '';
+      document.documentElement.style.overflow = prevDocOverflow || '';
+      document.body.style.touchAction = prevBodyTouch || '';
+      document.body.style.overscrollBehavior = '';
+    }
+    return () => {
+      document.body.style.overflow = prevBodyOverflow || '';
+      document.documentElement.style.overflow = prevDocOverflow || '';
+      document.body.style.touchAction = prevBodyTouch || '';
+      document.body.style.overscrollBehavior = '';
+    };
+  }, [snapshotOpen]);
   if (!project) {
     return (
       <div
@@ -93,6 +130,8 @@ export default function CaseStudy() {
       </div>
     );
   }
+
+  const snaps = project.snapshots ?? project.images ?? [project.image];
 
   return (
     <div key={slug} ref={rootRef} style={{ background: 'var(--cream)', minHeight: '100vh' }}>
@@ -601,6 +640,112 @@ export default function CaseStudy() {
         </div>
       )}
 
+      {/* ── Project Snapshot ── */}
+      {snaps && snaps.length > 0 && (
+        <div style={{ maxWidth: 900, margin: '0 auto 60px', padding: '0 6vw' }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.35)', display: 'block', marginBottom: 16 }}>Project Snapshot</span>
+
+          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            {/* Left: heading + supporting paragraph */}
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <h3 style={{
+                fontFamily: 'var(--display)',
+                fontWeight: 600,
+                fontSize: 'clamp(20px, 2.4vw, 28px)',
+                margin: '0 0 12px',
+                color: 'var(--black)'
+              }}>
+                Snapshot Preview
+              </h3>
+              <p style={{
+                fontFamily: 'var(--serif)',
+                fontSize: 'clamp(14px, 1.1vw, 16px)',
+                lineHeight: 1.6,
+                color: 'rgba(0,0,0,0.7)',
+                margin: 0
+              }}>
+                {project.desc}
+              </p>
+            </div>
+
+            {/* Right: fixed-size snapshot container */}
+            <div
+              role="button"
+              onClick={() => { setSnapshotMode(project.id === 'aspedan' ? 'horizontal' : 'vertical'); setSnapshotIndex(0); setSnapshotOpen(true); }}
+              style={{
+                width: 'min(520px, 45%)',
+                aspectRatio: '1 / 1',
+                flex: '0 0 auto',
+                border: '1px solid var(--border)',
+                overflow: 'hidden',
+                borderRadius: 6,
+                cursor: 'zoom-in',
+                background: '#111',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {project.id === 'aspedan' ? (
+                <div style={{ display: 'flex', gap: 8, padding: 8, height: '100%', alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                  {snaps.map((src, i) => (
+                    <div key={i} style={{ minWidth: 160, height: '100%', flex: '0 0 auto', overflow: 'hidden', borderRadius: 4 }}>
+                      <img src={src} alt={`${project.title} screen ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ width: '100%', height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img src={snaps[0] ?? project.hero ?? project.image} alt={`${project.title} snapshot`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay modal for snapshot */}
+      {snapshotOpen && (
+        <div role="dialog" aria-modal="true" style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, overscrollBehavior: 'contain' }} onClick={() => setSnapshotOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: 'calc(100% - 80px)', maxWidth: 1200, maxHeight: 'calc(100vh - 80px)', background: 'var(--cream)', padding: 12, overflow: 'hidden', borderRadius: 6 }}>
+            <button onClick={() => setSnapshotOpen(false)} style={{ position: 'absolute', right: 28, top: 28, zIndex: 1010, background: 'transparent', border: 'none', color: '#fff', fontSize: 22 }}>✕</button>
+            {(() => {
+              const imgs = snaps;
+              if (snapshotMode === 'vertical') {
+                return (
+                  <div onTouchMove={(e) => e.stopPropagation()} style={{ width: '100%', height: '90vh', overflowY: 'auto', background: '#111', WebkitOverflowScrolling: 'touch' }}>
+                    <img src={snaps[0] ?? project.hero ?? imgs[0] ?? project.image} alt={`${project.title} expanded`} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                  </div>
+                );
+              }
+              if (project.id === 'aspedan') {
+                return (
+                  <div onTouchMove={(e) => e.stopPropagation()} style={{ width: '100%', height: '100%', overflowX: 'auto', display: 'flex', gap: 16, alignItems: 'center', padding: 12, WebkitOverflowScrolling: 'touch' }}>
+                    {imgs.map((src, i) => (
+                      <div key={i} style={{ flex: '0 0 auto', width: 'min(380px, 46vw)', height: 'min(820px, calc(100vh - 180px))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '100%', height: '100%', borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)', background: '#111', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+                          <img src={src} alt={`${project.title} expanded ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+
+              return (
+                <div onTouchMove={(e) => e.stopPropagation()} style={{ width: '100%', height: '100%', overflowX: 'auto', display: 'flex', gap: 12, alignItems: 'center', padding: 8, WebkitOverflowScrolling: 'touch' }}>
+                  {imgs.map((src, i) => (
+                    <div key={i} style={{ minWidth: '70%', height: '100%', flex: '0 0 auto', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={src} alt={`${project.title} expanded ${i + 1}`} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
       {/* ── Next Project ── */}
       <div
         className="cs-section"
@@ -653,3 +798,5 @@ export default function CaseStudy() {
     </div>
   );
 }
+
+

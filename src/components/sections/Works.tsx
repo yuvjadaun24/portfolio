@@ -8,12 +8,13 @@ import { PROJECTS } from '@/data/projects';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Explicit bento placement for 4 cards
+// Explicit bento placement for up to 5 cards
 const BENTO_PLACEMENT: React.CSSProperties[] = [
   { gridColumn: '1 / 3', gridRow: '1 / 2' }, // wide left
   { gridColumn: '3 / 4', gridRow: '1 / 2' }, // tall right
   { gridColumn: '1 / 2', gridRow: '2 / 3' }, // bottom left
-  { gridColumn: '2 / 4', gridRow: '2 / 3' }, // wide bottom right
+  { gridColumn: '2 / 3', gridRow: '2 / 3' }, // bottom middle
+  { gridColumn: '3 / 4', gridRow: '2 / 3' }, // bottom right
 ];
 
 
@@ -237,7 +238,7 @@ export default function Works() {
           <div
             key={p.id}
             className="bento-cell"
-            style={BENTO_PLACEMENT[i]}
+            style={BENTO_PLACEMENT[i] ?? undefined}
           >
             <BentoCard project={p} />
           </div>
