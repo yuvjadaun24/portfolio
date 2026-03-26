@@ -8,11 +8,12 @@ import { PROJECTS } from '@/data/projects';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Explicit bento placement for 3 cards
+// Explicit bento placement for 4 cards
 const BENTO_PLACEMENT: React.CSSProperties[] = [
   { gridColumn: '1 / 3', gridRow: '1 / 2' }, // wide left
   { gridColumn: '3 / 4', gridRow: '1 / 2' }, // tall right
-  { gridColumn: '1 / 4', gridRow: '2 / 3' }, // full-width bottom
+  { gridColumn: '1 / 2', gridRow: '2 / 3' }, // bottom left
+  { gridColumn: '2 / 4', gridRow: '2 / 3' }, // wide bottom right
 ];
 
 
@@ -20,7 +21,7 @@ const BENTO_PLACEMENT: React.CSSProperties[] = [
 // BENTO CARD  — full-bleed image with overlaid text
 // ─────────────────────────────────────────────────────────
 function BentoCard({ project }: { project: (typeof PROJECTS)[0] }) {
-  const cardRef       = useRef<HTMLDivElement>(null);
+  const cardRef       = useRef<HTMLAnchorElement>(null);
   const discoverRef   = useRef<HTMLDivElement>(null);
   const discoverTextRef = useRef<HTMLSpanElement>(null);
 
@@ -77,13 +78,14 @@ function BentoCard({ project }: { project: (typeof PROJECTS)[0] }) {
   }, []);
 
   return (
-    <div
+    <Link
+      to={`/case-study/${project.id}`}
       ref={cardRef}
       className="bento-card"
       style={{
-        position: 'relative', width: '100%', height: '100%',
+        position: 'relative', display: 'block', width: '100%', height: '100%',
         overflow: 'hidden', background: '#111',
-        willChange: 'transform', cursor: 'none',
+        willChange: 'transform', textDecoration: 'none',
       }}
     >
       {/* WebGL image */}
@@ -137,18 +139,14 @@ function BentoCard({ project }: { project: (typeof PROJECTS)[0] }) {
               WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
             }}>{project.desc}</p>
           </div>
-          <Link
-            to={`/case-study/${project.id}`}
+          <div
             style={{
               width: 40, height: 40, borderRadius: '50%',
               background: '#fff', color: '#000',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 15, flexShrink: 0, textDecoration: 'none',
-              transition: 'background 0.25s, transform 0.25s',
+              fontSize: 15, flexShrink: 0,
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.75)'; e.currentTarget.style.transform = 'scale(1.12)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'scale(1)'; }}
-          >↗</Link>
+          >↗</div>
         </div>
       </div>
 
@@ -174,7 +172,7 @@ function BentoCard({ project }: { project: (typeof PROJECTS)[0] }) {
         >DISCOVER</span>
         <span style={{ fontSize: 14, lineHeight: 1, flexShrink: 0 }}>↗</span>
       </div>
-    </div>
+    </Link>
   );
 }
 

@@ -18,8 +18,7 @@
 }
 
 html { background: var(--cream); color: var(--black); }
-body { font-family: var(--mono); overflow-x: hidden; cursor: none; }
-* { cursor: none !important; }
+body { font-family: var(--mono); overflow-x: hidden; }
 ::-webkit-scrollbar { width: 0; }
 
 /* Lenis */
@@ -46,6 +45,5 @@ html.lenis { height: auto; }
 }
 
 @media (pointer: coarse) {
-  body, * { cursor: auto !important; }
   .cursor-blob { display: none !important; }
 }

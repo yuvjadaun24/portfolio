@@ -5,14 +5,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const REEL_IMAGES = [
-  'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=900&q=70',
-  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=900&q=70',
-  'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=900&q=70',
-  'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=900&q=70',
-  'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=900&q=70',
-  'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&q=70',
-  'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=900&q=70',
-  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=900&q=70',
+  '/images/Aifinite-image/Aifinite-2.png',
+  '/images/Aifinite-image/Aifinite-3.png',
+  '/images/Arogya-images/Arogya-2.png',
+  '/images/Arogya-images/Arogya-3.png',
+  '/images/parktek-images/Parktek-2.png',
+  '/images/parktek-images/Parktek-3.png',
+  '/images/Aspedan-images/Aspedan-2.png',
+  '/images/Aspedan-images/Aspedan-3.png',
 ];
 
 const DESIGN_SKILLS = [

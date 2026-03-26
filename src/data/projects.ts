@@ -5,6 +5,7 @@ export interface Project {
   tags: string[];
   desc: string;
   image: string;
+  images?: string[];
   domain: string;
   overview: string;
   problem: string;
@@ -21,7 +22,13 @@ export const PROJECTS: Project[] = [
     year: '2024',
     tags: ['UI/UX', 'EdTech', 'AI'],
     desc: 'A futuristic, immersive web platform designed to gateway students into AI and Data Science excellence through structured courses and interactive learning.',
-    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=85',
+    image: '/images/Aifinite-image/Aifinite-1.png',
+    images: [
+      '/images/Aifinite-image/Aifinite-1.png',
+      '/images/Aifinite-image/Aifinite-2.png',
+      '/images/Aifinite-image/Aifinite-3.png',
+      '/images/Aifinite-image/Aifinite-4.png',
+    ],
     domain: 'EdTech / AI & Data Science Platform',
     overview:
       'A futuristic, immersive web platform designed to gateway students into AI and Data Science excellence through structured courses and interactive learning.',
@@ -61,7 +68,14 @@ export const PROJECTS: Project[] = [
     year: '2024',
     tags: ['Product Design', 'Healthcare', 'Mobile'],
     desc: 'A secure, patient-centric healthcare application that simplifies medical records, provides instant care access, and incentivizes health data management.',
-    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=85',
+    image: '/images/Arogya-images/Arogya-1.png',
+    images: [
+      '/images/Arogya-images/Arogya-1.png',
+      '/images/Arogya-images/Arogya-2.png',
+      '/images/Arogya-images/Arogya-3.png',
+      '/images/Arogya-images/Arogya-4.png',
+      '/images/Arogya-images/Arogya-5.png',
+    ],
     domain: 'Healthcare Tech / Patient Record Management',
     overview:
       'A secure, patient-centric healthcare application that simplifies medical records, provides instant care access, and incentivizes health data management.',
@@ -101,7 +115,13 @@ export const PROJECTS: Project[] = [
     year: '2023',
     tags: ['B2B SaaS', 'Smart Infrastructure', 'Dashboard'],
     desc: 'A comprehensive smart parking ecosystem integrating AI-powered ANPR, smart registration, and professional fleet management into one seamless platform.',
-    image: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?w=1200&q=85',
+    image: '/images/parktek-images/Parktek-1.png',
+    images: [
+      '/images/parktek-images/Parktek-1.png',
+      '/images/parktek-images/Parktek-2.png',
+      '/images/parktek-images/Parktek-3.png',
+      '/images/parktek-images/Parktek-4.png',
+    ],
     domain: 'Smart Infrastructure / B2B SaaS',
     overview:
       'A comprehensive smart parking ecosystem integrating AI-powered ANPR, smart registration, and professional fleet management into one seamless platform.',
@@ -133,5 +153,52 @@ export const PROJECTS: Project[] = [
     designHighlights:
       'Architectural lines mapping the user journey, bold industrial color palette (Black/Yellow), and structured, data-heavy component layouts.',
     palette: ['#0a0a0a', '#eab308', '#fef08a', '#422006', '#fefce8'],
+  },
+  {
+    id: 'aspedan',
+    title: 'Aspedan',
+    year: '2024',
+    tags: ['Mobile App', 'Healthcare', 'AI Bot'],
+    desc: 'A conversational AI-powered health assistant mobile app that helps users track symptoms, understand health metrics, and get instant personalised guidance.',
+    image: '/images/Aspedan-images/Aspedan-1.png',
+    images: [
+      '/images/Aspedan-images/Aspedan-1.png',
+      '/images/Aspedan-images/Aspedan-2.png',
+      '/images/Aspedan-images/Aspedan-3.png',
+      '/images/Aspedan-images/Aspedan-4.png',
+      '/images/Aspedan-images/Aspedan-5.png',
+    ],
+    domain: 'Healthcare AI / Conversational Health Assistant',
+    overview:
+      'Aspedan is a smart AI health assistant mobile app that puts a personal healthcare companion in your pocket. It enables users to log symptoms, chat with an AI bot for instant health guidance, monitor vitals, and receive proactive wellness recommendations — all through an intuitive, approachable interface.',
+    problem:
+      'People frequently turn to unreliable online sources when they experience health concerns, leading to anxiety, misdiagnosis, and delayed professional care. Existing health apps are either too clinical and data-heavy, or too simplistic to provide meaningful value. There was a clear gap for a warm, conversational, AI-driven health companion that bridges the space between self-care and professional medical advice.',
+    solution:
+      'Designed a mobile-first conversational health assistant with a calming, approachable UI language. The AI bot interface uses natural language chat to help users triage symptoms, understand health data, and decide when to seek professional care — reducing anxiety and building health literacy. The design prioritises trust, clarity, and emotional warmth through soft gradients, rounded components, and empathetic micro-copy.',
+    features: [
+      {
+        title: 'Conversational AI Health Bot',
+        description:
+          'A real-time chat interface powered by AI that lets users describe symptoms in plain language and receive contextual, evidence-based guidance without jargon.',
+      },
+      {
+        title: 'Symptom Tracker & Health Log',
+        description:
+          'Daily check-in flows that log symptoms, energy levels, and mood over time — giving the AI richer context to surface patterns and early warnings.',
+      },
+      {
+        title: 'Vitals Dashboard',
+        description:
+          'A clean visual summary of key health metrics (heart rate, sleep, hydration, steps) pulled from device sensors and manual inputs, presented in an at-a-glance card layout.',
+      },
+      {
+        title: 'Proactive Wellness Nudges',
+        description:
+          'Contextual push notifications and in-app recommendations that remind users to hydrate, breathe, rest, or seek care — based on their logged data and conversation history.',
+      },
+    ],
+    designHighlights:
+      'Warm, calming colour system with soft gradients; conversational UI patterns with chat bubbles and typing indicators; card-based health summaries using accessible typography; rounded, touch-optimised components that feel safe and approachable on mobile.',
+    palette: ['#f0f4ff', '#6366f1', '#a5b4fc', '#1e1b4b', '#ffffff'],
   },
 ];

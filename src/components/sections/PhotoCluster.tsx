@@ -3,7 +3,7 @@ import gsap from 'gsap';
 
 const PHOTOS = [
   {
-    src: '/images/About-me-1.jpg',
+    src: '/images/Aifinite-image/Aifinite-2.png',
     style: {
       left: '6%', top: '20%',
       width: 'clamp(240px,22vw,340px)',
@@ -12,7 +12,7 @@ const PHOTOS = [
     } as React.CSSProperties,
   },
   {
-    src: '/images/About-me-2.jpg',
+    src: '/images/Arogya-images/Arogya-2.png',
     style: {
       left: '32%', top: '10%',
       width: 'clamp(340px,33vw,500px)',
@@ -21,7 +21,7 @@ const PHOTOS = [
     } as React.CSSProperties,
   },
   {
-    src: '/images/About-me-3.jpg',
+    src: '/images/Aspedan-images/Aspedan-2.png',
     style: {
       right: '4%', top: '48%',
       width: 'clamp(280px,24vw,360px)',

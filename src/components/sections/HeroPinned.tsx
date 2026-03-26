@@ -8,14 +8,14 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // Project thumbnail images for the tray
 const TRAY_IMAGES = [
-  { src: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=300&q=80', alt: 'AI/ML Platform' },
-  { src: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=300&q=80', alt: 'FinTech' },
-  { src: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&q=80', alt: 'Dashboard' },
-  { src: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=300&q=80', alt: 'Responsive Web' },
-  { src: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=300&q=80', alt: 'Mobile' },
-  { src: 'https://images.unsplash.com/photo-1557838923-2985c318be48?w=300&q=80', alt: 'Design System' },
-  { src: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&q=80', alt: 'UX Research' },
-  { src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&q=80', alt: 'Analytics' },
+  { src: '/images/Aifinite-image/Aifinite-1.png',   alt: 'Aifinite' },
+  { src: '/images/Arogya-images/Arogya-1.png',      alt: 'Arogya' },
+  { src: '/images/parktek-images/Parktek-1.png',    alt: 'ParkTek' },
+  { src: '/images/Aspedan-images/Aspedan-1.png',    alt: 'Aspedan' },
+  { src: '/images/Aifinite-image/Aifinite-3.png',   alt: 'Aifinite' },
+  { src: '/images/Arogya-images/Arogya-3.png',      alt: 'Arogya' },
+  { src: '/images/parktek-images/Parktek-3.png',    alt: 'ParkTek' },
+  { src: '/images/Aspedan-images/Aspedan-3.png',    alt: 'Aspedan' },
 ];
 
 export default function HeroPinned() {

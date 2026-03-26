@@ -12,7 +12,7 @@ export default function CaseStudy() {
   const project = PROJECTS.find((p) => p.id === slug);
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -39,7 +39,7 @@ export default function CaseStudy() {
         }
 
         // Animate content sections
-        const sections = contentRef.current?.querySelectorAll('.cs-section');
+        const sections = rootRef.current?.querySelectorAll('.cs-section');
         sections?.forEach((section) => {
           gsap.from(section, {
             y: 40,
@@ -95,7 +95,7 @@ export default function CaseStudy() {
   }
 
   return (
-    <div key={slug} style={{ background: 'var(--cream)', minHeight: '100vh' }}>
+    <div key={slug} ref={rootRef} style={{ background: 'var(--cream)', minHeight: '100vh' }}>
       {/* ── Back button ── */}
       <div
         style={{
@@ -107,6 +107,7 @@ export default function CaseStudy() {
       >
         <Link
           to="/"
+          state={{ scrollTo: 'works' }}
           style={{
             fontFamily: 'var(--mono)',
             fontSize: 11,
@@ -293,51 +294,57 @@ export default function CaseStudy() {
         </div>
       </div>
 
-      {/* ── Content ── */}
-      <div
-        ref={contentRef}
-        style={{
-          maxWidth: 900,
-          margin: '0 auto',
-          padding: '0 6vw 100px',
-        }}
-      >
-        {/* Overview */}
-        <div className="cs-section" style={{ marginBottom: 80 }}>
-          <span
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 10,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: 'rgba(0,0,0,0.35)',
-              display: 'block',
-              marginBottom: 16,
-            }}
-          >
-            Overview
-          </span>
-          <p
-            style={{
-              fontFamily: 'var(--serif)',
-              fontSize: 'clamp(18px, 2vw, 26px)',
-              lineHeight: 1.5,
-              color: 'var(--black)',
-              fontWeight: 400,
-            }}
-          >
-            {project.overview}
-          </p>
-        </div>
+      {/* ── Overview ── */}
+      <div className="cs-section" style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 6vw' }}>
+        <span
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(0,0,0,0.35)',
+            display: 'block',
+            marginBottom: 16,
+          }}
+        >
+          Overview
+        </span>
+        <p
+          style={{
+            fontFamily: 'var(--serif)',
+            fontSize: 'clamp(18px, 2vw, 26px)',
+            lineHeight: 1.5,
+            color: 'var(--black)',
+            fontWeight: 400,
+          }}
+        >
+          {project.overview}
+        </p>
+      </div>
 
-        {/* Problem / Solution — side by side */}
+      {/* ── Image Break 1 — screen 2, wide editorial (16:7) ── */}
+      {project.images?.[1] && (
+        <div style={{ maxWidth: 1200, margin: '0 auto 80px', padding: '0 6vw' }}>
+          <div style={{ width: '100%', aspectRatio: '16 / 7', overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <img
+              src={project.images[1]}
+              alt={`${project.title} — screen 2`}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── Problem / Solution ── */}
+      <div
+        className="cs-section"
+        style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 6vw' }}
+      >
         <div
-          className="cs-section"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
             gap: 48,
-            marginBottom: 80,
             paddingBottom: 60,
             borderBottom: '1px solid var(--border)',
           }}
@@ -395,198 +402,253 @@ export default function CaseStudy() {
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Key Features */}
-        <div className="cs-section" style={{ marginBottom: 80 }}>
-          <span
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 10,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: 'rgba(0,0,0,0.35)',
-              display: 'block',
-              marginBottom: 32,
-            }}
-          >
-            Key Features
-          </span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {project.features.map((feature, i) => (
-              <div
-                key={i}
+      {/* ── Image Break 2 — screen 3, full-bleed horizontal strip ── */}
+      {project.images?.[2] && (
+        <div
+          style={{
+            width: '100%',
+            height: '45vh',
+            overflow: 'hidden',
+            marginBottom: 80,
+            borderTop: '1px solid var(--border)',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          <img
+            src={project.images[2]}
+            alt={`${project.title} — screen 3`}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        </div>
+      )}
+
+      {/* ── Key Features ── */}
+      <div className="cs-section" style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 6vw' }}>
+        <span
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(0,0,0,0.35)',
+            display: 'block',
+            marginBottom: 32,
+          }}
+        >
+          Key Features
+        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {project.features.map((feature, i) => (
+            <div
+              key={i}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '40px 1fr',
+                gap: 24,
+                padding: '28px 0',
+                borderTop: '1px solid var(--border)',
+              }}
+            >
+              <span
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '40px 1fr',
-                  gap: 24,
-                  padding: '28px 0',
-                  borderTop: '1px solid var(--border)',
+                  fontFamily: 'var(--mono)',
+                  fontSize: 11,
+                  color: 'rgba(0,0,0,0.25)',
+                  paddingTop: 2,
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: 11,
-                    color: 'rgba(0,0,0,0.25)',
-                    paddingTop: 2,
-                  }}
-                >
-                  0{i + 1}
-                </span>
-                <div>
-                  <h3
-                    style={{
-                      fontFamily: 'var(--display)',
-                      fontSize: 'clamp(18px, 2vw, 28px)',
-                      fontWeight: 400,
-                      color: 'var(--black)',
-                      marginBottom: 8,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    {feature.title}
-                  </h3>
-                  <p
-                    style={{
-                      fontFamily: 'var(--serif)',
-                      fontSize: 'clamp(13px, 1.1vw, 16px)',
-                      lineHeight: 1.6,
-                      color: 'rgba(0,0,0,0.6)',
-                      fontWeight: 400,
-                    }}
-                  >
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Design Highlights + Color Palette */}
-        <div
-          className="cs-section"
-          style={{
-            marginBottom: 80,
-            paddingTop: 48,
-            borderTop: '1px solid var(--border)',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 10,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: 'rgba(0,0,0,0.35)',
-              display: 'block',
-              marginBottom: 16,
-            }}
-          >
-            Design Highlights
-          </span>
-          <p
-            style={{
-              fontFamily: 'var(--serif)',
-              fontSize: 'clamp(14px, 1.2vw, 18px)',
-              lineHeight: 1.65,
-              color: 'var(--black)',
-              fontWeight: 400,
-              marginBottom: 40,
-            }}
-          >
-            {project.designHighlights}
-          </p>
-
-          {/* Palette */}
-          <span
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 10,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: 'rgba(0,0,0,0.35)',
-              display: 'block',
-              marginBottom: 16,
-            }}
-          >
-            Color Palette
-          </span>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {project.palette.map((color) => (
-              <div key={color} style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    width: 56,
-                    height: 56,
-                    background: color,
-                    border: '1px solid var(--border)',
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: 9,
-                    letterSpacing: '0.08em',
-                    color: 'rgba(0,0,0,0.35)',
-                    marginTop: 6,
-                    display: 'block',
-                  }}
-                >
-                  {color}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Next project link */}
-        <div
-          className="cs-section"
-          style={{
-            paddingTop: 60,
-            borderTop: '1px solid var(--border)',
-            textAlign: 'center',
-          }}
-        >
-          {(() => {
-            const currentIndex = PROJECTS.findIndex((p) => p.id === project.id);
-            const nextProject = PROJECTS[(currentIndex + 1) % PROJECTS.length];
-            return (
+                0{i + 1}
+              </span>
               <div>
-                <span
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: 10,
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(0,0,0,0.35)',
-                    display: 'block',
-                    marginBottom: 16,
-                  }}
-                >
-                  Next Project
-                </span>
-                <Link
-                  to={`/case-study/${nextProject.id}`}
+                <h3
                   style={{
                     fontFamily: 'var(--display)',
-                    fontSize: 'clamp(32px, 6vw, 80px)',
+                    fontSize: 'clamp(18px, 2vw, 28px)',
+                    fontWeight: 400,
                     color: 'var(--black)',
-                    textDecoration: 'none',
-                    lineHeight: 0.95,
-                    display: 'inline-block',
-                    transition: 'opacity 0.3s',
+                    marginBottom: 8,
+                    textTransform: 'uppercase',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.5')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                 >
-                  {nextProject.title} ↗
-                </Link>
+                  {feature.title}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: 'var(--serif)',
+                    fontSize: 'clamp(13px, 1.1vw, 16px)',
+                    lineHeight: 1.6,
+                    color: 'rgba(0,0,0,0.6)',
+                    fontWeight: 400,
+                  }}
+                >
+                  {feature.description}
+                </p>
               </div>
-            );
-          })()}
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* ── Image Break 3 — screen 4, 2/3 width right-anchored ── */}
+      {project.images?.[3] && (
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: '0 auto 80px',
+            padding: '0 6vw',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <div style={{ width: '68%', aspectRatio: '4 / 3', overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <img
+              src={project.images[3]}
+              alt={`${project.title} — screen 4`}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── Design Highlights + Color Palette ── */}
+      <div
+        className="cs-section"
+        style={{
+          maxWidth: 900,
+          margin: '0 auto 80px',
+          padding: '48px 6vw 0',
+          borderTop: '1px solid var(--border)',
+        }}
+      >
+        <span
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(0,0,0,0.35)',
+            display: 'block',
+            marginBottom: 16,
+          }}
+        >
+          Design Highlights
+        </span>
+        <p
+          style={{
+            fontFamily: 'var(--serif)',
+            fontSize: 'clamp(14px, 1.2vw, 18px)',
+            lineHeight: 1.65,
+            color: 'var(--black)',
+            fontWeight: 400,
+            marginBottom: 40,
+          }}
+        >
+          {project.designHighlights}
+        </p>
+        <span
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(0,0,0,0.35)',
+            display: 'block',
+            marginBottom: 16,
+          }}
+        >
+          Color Palette
+        </span>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {project.palette.map((color) => (
+            <div key={color} style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  background: color,
+                  border: '1px solid var(--border)',
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: 'var(--mono)',
+                  fontSize: 9,
+                  letterSpacing: '0.08em',
+                  color: 'rgba(0,0,0,0.35)',
+                  marginTop: 6,
+                  display: 'block',
+                }}
+              >
+                {color}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Image Break 4 — screen 5, panoramic accent (Arogya / Aspedan only) ── */}
+      {project.images?.[4] && (
+        <div style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 6vw' }}>
+          <div style={{ width: '100%', aspectRatio: '3 / 1', overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <img
+              src={project.images[4]}
+              alt={`${project.title} — screen 5`}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── Next Project ── */}
+      <div
+        className="cs-section"
+        style={{
+          maxWidth: 900,
+          margin: '0 auto',
+          padding: '60px 6vw 100px',
+          borderTop: '1px solid var(--border)',
+          textAlign: 'center',
+        }}
+      >
+        {(() => {
+          const currentIndex = PROJECTS.findIndex((p) => p.id === project.id);
+          const nextProject = PROJECTS[(currentIndex + 1) % PROJECTS.length];
+          return (
+            <div>
+              <span
+                style={{
+                  fontFamily: 'var(--mono)',
+                  fontSize: 10,
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(0,0,0,0.35)',
+                  display: 'block',
+                  marginBottom: 16,
+                }}
+              >
+                Next Project
+              </span>
+              <Link
+                to={`/case-study/${nextProject.id}`}
+                style={{
+                  fontFamily: 'var(--display)',
+                  fontSize: 'clamp(32px, 6vw, 80px)',
+                  color: 'var(--black)',
+                  textDecoration: 'none',
+                  lineHeight: 0.95,
+                  display: 'inline-block',
+                  transition: 'opacity 0.3s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.5')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+              >
+                {nextProject.title} ↗
+              </Link>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
