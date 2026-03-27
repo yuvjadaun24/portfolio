@@ -31,11 +31,65 @@ export default function Navbar() {
       onLeaveBack: () => navRef.current?.classList.remove('scrolled'),
     });
 
+    /**
+     * Compute content-weighted scroll progress.
+     * Pinned sections consume large scroll distances while the viewport stays
+     * in place; raw scrollY/maxScroll races ahead during pins.
+     * This compresses each pin's scroll range down to the pinned element's
+     * natural height so progress maps to *how much content has been seen*.
+     */
+    const getContentProgress = (): number => {
+      const scrollPos = window.scrollY;
+      const maxScroll = ScrollTrigger.maxScroll(window);
+      if (maxScroll <= 0) return 0;
+
+      const pins = ScrollTrigger.getAll()
+        .filter(t => (t as any).pin)
+        .sort((a, b) => a.start - b.start);
+
+      if (pins.length === 0) return scrollPos / maxScroll;
+
+      let adjustedScroll = 0;
+      let adjustedMax = 0;
+      let cursor = 0;
+
+      for (const t of pins) {
+        const pinDist = t.end - t.start;
+        const pinEl = (t as any).pin as HTMLElement | undefined;
+        const elHeight = pinEl?.offsetHeight ?? window.innerHeight;
+
+        // Normal-scroll region before this pin
+        const gap = t.start - cursor;
+        if (gap > 0) {
+          adjustedMax += gap;
+          adjustedScroll += Math.min(Math.max(scrollPos - cursor, 0), gap);
+        }
+
+        // Pin region — compress to element's natural height
+        adjustedMax += elHeight;
+        if (scrollPos > t.start) {
+          const rawInPin = Math.min(scrollPos - t.start, pinDist);
+          adjustedScroll += (rawInPin / pinDist) * elHeight;
+        }
+
+        cursor = t.end;
+      }
+
+      // Normal-scroll region after the last pin
+      const tail = maxScroll - cursor;
+      if (tail > 0) {
+        adjustedMax += tail;
+        adjustedScroll += Math.max(0, Math.min(scrollPos - cursor, tail));
+      }
+
+      return adjustedMax > 0
+        ? Math.min(1, Math.max(0, adjustedScroll / adjustedMax))
+        : 0;
+    };
+
     const onScroll = () => {
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = total > 0 ? window.scrollY / total : 0;
       if (progressRef.current) {
-        progressRef.current.style.transform = `scaleX(${progress})`;
+        progressRef.current.style.transform = `scaleX(${getContentProgress()})`;
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });

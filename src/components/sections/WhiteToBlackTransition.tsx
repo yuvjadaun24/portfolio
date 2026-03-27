@@ -30,7 +30,7 @@ export default function WhiteToBlackTransition() {
       ScrollTrigger.create({
         trigger: wrapRef.current,
         start: 'top top',
-        end: '+=300%',
+        end: '+=150%',
         pin: true,
         anticipatePin: 1,
         scrub: 1.5,
