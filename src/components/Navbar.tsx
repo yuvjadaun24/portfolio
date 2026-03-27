@@ -163,7 +163,7 @@ export default function Navbar() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '17px 24px',
-                fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.2em',
+                fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.2em',
                 textDecoration: 'none', color: 'currentColor',
                 borderRight: '1px solid var(--nav-border)',
                 opacity: hovered !== null && hovered !== l.href ? 0.3 : 0.75,
@@ -206,7 +206,7 @@ export default function Navbar() {
             style={{
               display: 'flex', alignItems: 'center',
               padding: '17px 24px',
-              fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.1em',
+              fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.1em',
               textDecoration: 'none', color: 'currentColor', opacity: 0.6,
               transition: 'opacity 0.3s', textTransform: 'uppercase',
             }}

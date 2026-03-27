@@ -294,7 +294,7 @@ export default function HeroPinned() {
       >
         <p style={{
           fontFamily: 'var(--mono)',
-          fontSize: 11,
+          fontSize: 14,
           lineHeight: 1.7,
           letterSpacing: '0.03em',
           color: 'var(--black)',

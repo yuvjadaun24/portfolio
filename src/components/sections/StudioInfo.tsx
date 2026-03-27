@@ -41,11 +41,7 @@ export default function StudioInfo() {
         setReelRunning(true);
         intervalRef.current = setInterval(() => {
           setReelIdx(i => (i + 1) % REEL_IMAGES.length);
-        }, 110);
-        setTimeout(() => {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          setReelRunning(false);
-        }, 4000);
+        }, 600);
       },
     });
 
@@ -79,26 +75,31 @@ export default function StudioInfo() {
       {/* LEFT — rapid project reel */}
       <div style={{
         background: '#1e1e1e', overflow: 'hidden',
-        position: 'relative', minHeight: '70vh',
+        position: 'relative', minHeight: '70vh', borderTopRightRadius:20, borderBottomRightRadius:20,
       }}>
         <img
+          key={reelIdx}
           src={REEL_IMAGES[reelIdx]}
           alt=""
           style={{
             width: '100%', height: '100%',
             objectFit: 'cover', display: 'block',
             position: 'absolute', inset: 0,
+            animation: 'reelFadeIn 0.4s ease',
           }}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
         {/* Flickering dot indicator */}
-        <div style={{
+        {/* <div style={{
           position: 'absolute', top: 20, right: 20,
           width: 8, height: 8, borderRadius: '50%',
           background: reelRunning ? '#ff3b30' : 'rgba(255,255,255,0.2)',
           animation: reelRunning ? 'flicker 0.3s infinite alternate' : 'none',
         }} />
-        <style>{`@keyframes flicker { 0% { opacity: 1; } 100% { opacity: 0.3; } }`}</style>
+        <style>{`
+          @keyframes flicker { 0% { opacity: 1; } 100% { opacity: 0.3; } }
+          @keyframes reelFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        `}</style> */}
       </div>
 
       {/* RIGHT — bio + skills */}
@@ -121,7 +122,7 @@ export default function StudioInfo() {
             UI/UX Designer with 3.5+ years bridging design and technology, passionate about accessible and immersive digital experiences.
           </p>
           <p className="reel-text-item" style={{
-            fontFamily: 'var(--mono)', fontSize: 12, lineHeight: 1.7,
+            fontFamily: 'var(--mono)', fontSize: 14, lineHeight: 1.7,
             color: 'rgba(0,0,0,0.5)',
           }}>
             45% engagement uplift · 30% retention growth · 95% client satisfaction · 90% on-time delivery across 10+ projects.
@@ -132,27 +133,40 @@ export default function StudioInfo() {
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              display: 'inline-block', marginTop: '3vh',
-              fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.2em',
-              color: 'var(--black)', textDecoration: 'none',
-              border: '1px solid rgba(0,0,0,0.2)', padding: '10px 20px',
-              transition: 'background 0.3s, color 0.3s',
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              marginTop: '3vh',
+              fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.2em',
+              color: 'var(--cream)', textDecoration: 'none',
+              background: 'var(--black)',
+              border: '1px solid var(--black)', padding: '12px 24px',
+              transition: 'background 0.3s, color 0.3s, border-color 0.3s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--black)'; e.currentTarget.style.color = 'var(--cream)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--black)'; }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--black)';
+              e.currentTarget.style.borderColor = 'var(--black)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'var(--black)';
+              e.currentTarget.style.color = 'var(--cream)';
+              e.currentTarget.style.borderColor = 'var(--black)';
+            }}
           >
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style={{ flexShrink: 0 }}>
+              <path d="M6.5 1v7M3.5 5.5l3 3 3-3M1.5 10h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             DOWNLOAD RÉSUMÉ
           </a>
         </div>
 
         <div>
           <p className="reel-text-item" style={{
-            fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.2em',
+            fontFamily: 'var(--mono)', fontSize: 18, letterSpacing: '0.2em',
             color: 'rgba(0,0,0,0.35)', marginBottom: 20, textTransform: 'uppercase',
           }}>Design Tools</p>
           {DESIGN_SKILLS.map(s => (
             <p key={s} className="reel-text-item" style={{
-              fontFamily: 'var(--mono)', fontSize: 12, lineHeight: 1.9,
+              fontFamily: 'var(--mono)', fontSize: 14, lineHeight: 1.9,
               color: 'rgba(0,0,0,0.7)',
             }}>{s}</p>
           ))}
@@ -160,12 +174,12 @@ export default function StudioInfo() {
 
         <div>
           <p className="reel-text-item" style={{
-            fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.2em',
+            fontFamily: 'var(--mono)', fontSize: 18, letterSpacing: '0.2em',
             color: 'rgba(0,0,0,0.35)', marginBottom: 20, textTransform: 'uppercase',
           }}>Research & Strategy</p>
           {RESEARCH_SKILLS.map(s => (
             <p key={s} className="reel-text-item" style={{
-              fontFamily: 'var(--mono)', fontSize: 12, lineHeight: 1.9,
+              fontFamily: 'var(--mono)', fontSize: 14, lineHeight: 1.9,
               color: 'rgba(0,0,0,0.7)',
             }}>{s}</p>
           ))}

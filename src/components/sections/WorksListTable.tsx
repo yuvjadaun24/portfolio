@@ -46,13 +46,13 @@ export default function WorksListTable() {
           }}>{p.title}</span>
           <span style={{
             fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.2em',
-            color: 'rgba(255,255,255,0.3)',
+            color: 'rgba(255,255,255,0.9)',
           }}>{p.year}</span>
           <div style={{ display: 'flex', gap: 16 }}>
             {p.tags.map(t => (
               <span key={t} style={{
                 fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.2em',
-                color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase',
               }}>{t}</span>
             ))}
           </div>

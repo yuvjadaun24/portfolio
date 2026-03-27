@@ -5,7 +5,7 @@ import SplineSafe from '@/components/SplineSafe';
 
 gsap.registerPlugin(ScrollTrigger);
 
-type Step = 'init' | 'name' | 'email' | 'type' | 'note' | 'done';
+type Step = 'init' | 'name' | 'email' | 'type' | 'note' | 'sending' | 'done' | 'error';
 type Message = { from: 'bot' | 'user'; text: string };
 
 const PROJECT_TYPES = [
@@ -15,6 +15,7 @@ const PROJECT_TYPES = [
 
 export default function Contact() {
   const [step, setStep] = useState<Step>('init');
+  const [inputError, setInputError] = useState('');
   const [input, setInput] = useState('');
   const [data, setData] = useState({ name: '', email: '', type: '', note: '' });
   const [msgs, setMsgs] = useState<Message[]>([
@@ -28,34 +29,53 @@ export default function Contact() {
   const push = (from: 'bot' | 'user', text: string) =>
     setMsgs(prev => [...prev, { from, text }]);
 
-  const advance = () => {
+  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+  const advance = async () => {
+    setInputError('');
     if (step === 'init') {
       push('bot', "Hi — what's your name?");
       setStep('name');
-    } else if (step === 'name' && input.trim()) {
-      setData(d => ({ ...d, name: input }));
-      push('user', input);
-      push('bot', `Nice to meet you, ${input}! What's your email?`);
+    } else if (step === 'name') {
+      if (!input.trim()) { setInputError('Please enter your name.'); return; }
+      setData(d => ({ ...d, name: input.trim() }));
+      push('user', input.trim());
+      push('bot', `Nice to meet you, ${input.trim()}! What's your email?`);
       setStep('email');
       setInput('');
-    } else if (step === 'email' && input.trim()) {
-      setData(d => ({ ...d, email: input }));
-      push('user', input);
+    } else if (step === 'email') {
+      if (!isValidEmail(input.trim())) { setInputError('Please enter a valid email address.'); return; }
+      setData(d => ({ ...d, email: input.trim() }));
+      push('user', input.trim());
       push('bot', 'What kind of project are you thinking?');
       setStep('type');
       setInput('');
-    } else if (step === 'note' && input.trim()) {
-      const note = input;
+    } else if (step === 'note') {
+      if (!input.trim()) { setInputError('Please leave a short note.'); return; }
+      const note = input.trim();
+      const payload = { ...data, note };
       setData(d => ({ ...d, note }));
       push('user', note);
-      setStep('done');
+      setStep('sending');
       setInput('');
-      fetch('https://formspree.io/f/mdkoapzn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, note }),
-      });
-      setTimeout(() => push('bot', "Message sent! I'll get back to you soon."), 500);
+      try {
+        const res = await fetch('https://formspree.io/f/mnjonlve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('Network response was not ok');
+        setStep('done');
+        push('bot', "Message sent! I'll get back to you soon.");
+      } catch {
+        setStep('error');
+        push('bot', 'Hmm, something went wrong. Please email me directly at yuvrajjadaun2@gmail.com');
+      }
+    } else if (step === 'error') {
+      // restart
+      setStep('init');
+      setData({ name: '', email: '', type: '', note: '' });
+      setMsgs([{ from: 'bot', text: "Hey there! I'm Yuvraj's contact bot. Ready to discuss your next project.\n\nShall we get started?  Hit Enter" }]);
     }
   };
 
@@ -68,7 +88,7 @@ export default function Contact() {
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    if (step !== 'init' && step !== 'type' && step !== 'done') setTimeout(() => inputRef.current?.focus(), 80);
+    if (step !== 'init' && step !== 'type' && step !== 'done' && step !== 'sending' && step !== 'error') setTimeout(() => inputRef.current?.focus(), 80);
   }, [msgs, step]);
 
   useEffect(() => {
@@ -149,6 +169,12 @@ export default function Contact() {
             </div>
           ))}
 
+          {step === 'sending' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.15em' }}>SENDING…</span>
+            </div>
+          )}
+
           {step === 'type' && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
               {PROJECT_TYPES.map(t => (
@@ -173,27 +199,42 @@ export default function Contact() {
           padding: '14px 24px',
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
-          {step !== 'type' && step !== 'done' && (
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && advance()}
-              placeholder={step === 'init' ? '...' : step === 'name' ? 'Your name' : step === 'email' ? 'your@email.com' : 'Additional notes...'}
-              style={{
-                flex: 1, background: 'none', border: 'none', outline: 'none',
-                fontFamily: 'var(--mono)', fontSize: 12, color: '#fff', caretColor: '#fff',
-              }}
-            />
+          {step !== 'type' && step !== 'done' && step !== 'sending' && step !== 'error' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={e => { setInput(e.target.value); setInputError(''); }}
+                onKeyDown={e => e.key === 'Enter' && advance()}
+                placeholder={step === 'init' ? '...' : step === 'name' ? 'Your name' : step === 'email' ? 'your@email.com' : 'Additional notes...'}
+                style={{
+                  flex: 1, background: 'none', border: 'none', outline: 'none',
+                  fontFamily: 'var(--mono)', fontSize: 12, color: '#fff', caretColor: '#fff',
+                }}
+              />
+              {inputError && (
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#ff6b6b', letterSpacing: '0.1em' }}>{inputError}</span>
+              )}
+            </div>
           )}
           {step === 'done' && (
             <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>
               MESSAGE SENT — TALK SOON
             </span>
           )}
+          {(step === 'sending') && (
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>
+              SENDING…
+            </span>
+          )}
+          {step === 'error' && (
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>
+              FAILED — HIT SEND TO RETRY
+            </span>
+          )}
           <button
             onClick={advance}
-            disabled={step === 'done' || step === 'type'}
+            disabled={step === 'done' || step === 'type' || step === 'sending'}
             style={{
               marginLeft: 'auto',
               background: step === 'done' ? 'transparent' : 'rgba(255,255,255,0.1)',
