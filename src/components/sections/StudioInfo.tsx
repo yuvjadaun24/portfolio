@@ -119,7 +119,7 @@ export default function StudioInfo() {
             fontSize: 'clamp(18px,1.8vw,26px)',
             lineHeight: 1.35, color: 'var(--black)', marginBottom: '4vh',
           }}>
-            UI/UX Designer with 3.5+ years bridging design and technology, passionate about accessible and immersive digital experiences.
+            UI/UX Designer with 4.5+ years bridging design and technology, passionate about accessible and immersive digital experiences.
           </p>
           <p className="reel-text-item" style={{
             fontFamily: 'var(--mono)', fontSize: 14, lineHeight: 1.7,

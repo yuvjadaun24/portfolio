@@ -301,7 +301,7 @@ export default function HeroPinned() {
           opacity: 0.75,
           textAlign: 'justify',
         }}>
-          UI/UX Designer with 3.5+ years bridging design &amp; technology. Specialising in accessible, data-driven digital experiences.
+          UI/UX Designer with 4.5+ years bridging design &amp; technology. Specialising in accessible, data-driven digital experiences.
         </p>
       </div>
     </div>

@@ -203,7 +203,7 @@ export default function Hero() {
             lineHeight: 1.8, letterSpacing: '0.02em', marginBottom: 32,
           }}
         >
-          UI/UX Designer with 3.5+ years bridging design &amp; technology.
+          UI/UX Designer with 4.5+ years bridging design &amp; technology.
           <br />
           Crafting accessible, immersive digital experiences that convert.
         </p>

@@ -129,7 +129,7 @@ export default function About() {
             fontFamily: 'var(--mono)', fontSize: 14, lineHeight: 1.8,
             color: 'var(--gray)', marginBottom: 40, maxWidth: 480,
           }}>
-            With 3.5+ years of experience I specialise in user research, wireframing, and
+            With 4.5+ years of experience I specialise in user research, wireframing, and
             prototyping to deliver WCAG-accessible and responsive web solutions. Proficient in
             Figma, Adobe XD, and modern frontend frameworks. Consistently improved retention and
             engagement through data-driven iterations — 95% client satisfaction across 7+ projects.
