@@ -1,5 +1,6 @@
 import { useEffect, useRef, Suspense, lazy } from 'react';
 import gsap from 'gsap';
+import type { Application } from '@splinetool/runtime';
 
 const Spline = lazy(() => import('@splinetool/react-spline'));
 
@@ -26,10 +27,48 @@ const PHOTOS: PhotoDef[] = [
 
 export default function Hero() {
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const splineAppRef = useRef<Application | null>(null);
+
+  const disposeSpline = () => {
+    const app = splineAppRef.current;
+    if (!app) return;
+
+    (app as any).scene?.traverse((obj: any) => {
+      if (obj.geometry) obj.geometry.dispose();
+
+      if (obj.material) {
+        const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+        materials.forEach((mat: any) => {
+          Object.values(mat).forEach((val: any) => {
+            if (val?.isTexture) val.dispose();
+          });
+          mat.dispose();
+        });
+      }
+    });
+
+    (app as any).renderer?.dispose();
+    (app as any).renderer?.forceContextLoss();
+    splineAppRef.current = null;
+  };
+
+  // Dispose Spline GPU resources on unmount or forced page unload
+  useEffect(() => {
+    window.addEventListener('force-gpu-dispose', disposeSpline);
+    return () => {
+      window.removeEventListener('force-gpu-dispose', disposeSpline);
+      disposeSpline();
+    };
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.3 });
+      const tl = gsap.timeline({
+        delay: 0.3,
+        onComplete() {
+          gsap.set(this.targets(), { clearProps: 'will-change' });
+        },
+      });
       tl.from('.hero-corner-tl, .hero-corner-tr', { opacity: 0, duration: 0.8 })
         .from(
           imgRefs.current.filter(Boolean),
@@ -75,8 +114,12 @@ export default function Hero() {
     >
       {/* Spline 3D background */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.75 }}>
-        <Suspense fallback={null}>
-          <Spline scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode" />
+        <Suspense fallback={<div style={{ width: '100%', height: '100%', background: 'transparent' }} />}>
+          <Spline
+            scene="https://prod.spline.design/qIB3Yi6uopze8PhU/scene.splinecode"
+            onLoad={(app) => { splineAppRef.current = app; }}
+            renderOnDemand
+          />
         </Suspense>
       </div>
 

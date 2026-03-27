@@ -203,6 +203,9 @@ function startRenderer(container: HTMLDivElement, src: string): (() => void) | u
     // ── Render loop ──
     let last = performance.now();
     const tick = (now: number) => {
+      // Skip GPU work when tab is hidden
+      if ((window as any).__tabHidden) return;
+
       const dt = (now - last) * 0.001;
       last = now;
       uniforms.uTime.value = (uniforms.uTime.value as number) + dt;
@@ -217,8 +220,16 @@ function startRenderer(container: HTMLDivElement, src: string): (() => void) | u
     gsap.ticker.remove(tick);
     ro.disconnect();
     if (container.contains(canvas)) container.removeChild(canvas);
-    renderer.dispose();
+
+    // Dispose loaded texture
+    const tex = uniforms.uTexture.value as THREE.Texture | null;
+    if (tex) tex.dispose();
+
     mat.dispose();
     geom.dispose();
+    renderer.dispose();
+
+    // Force-release the WebGL context
+    renderer.forceContextLoss();
   };
 }

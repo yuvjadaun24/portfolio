@@ -25,7 +25,7 @@ export default function Navbar() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   useEffect(() => {
-    ScrollTrigger.create({
+    const st = ScrollTrigger.create({
       start: 'top -60',
       onEnter: () => navRef.current?.classList.add('scrolled'),
       onLeaveBack: () => navRef.current?.classList.remove('scrolled'),
@@ -39,7 +39,10 @@ export default function Navbar() {
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      st.kill();
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return (

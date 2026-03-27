@@ -21,6 +21,12 @@ export default function CustomCursor() {
     };
 
     const tick = () => {
+      // Skip work when tab is hidden
+      if ((window as any).__tabHidden) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+
       curX += (mouseX - curX) * 0.14;
       curY += (mouseY - curY) * 0.14;
 

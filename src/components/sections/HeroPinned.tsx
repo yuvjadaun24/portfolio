@@ -128,6 +128,19 @@ export default function HeroPinned() {
           if (self.progress > 0.25 && self.progress < 0.95) nav.classList.add('dark');
           else nav.classList.remove('dark');
         },
+        onLeave: () => {
+          // Release GPU compositor layers once the pinned section is past
+          gsap.set(
+            [overlayRef.current, headingRef.current, descRef.current, splineRef.current, ...trayRefs.current.filter(Boolean)],
+            { clearProps: 'will-change' },
+          );
+        },
+        onEnterBack: () => {
+          // Re-promote layers when scrolling back into the pinned section
+          gsap.set(overlayRef.current, { willChange: 'clip-path' });
+          gsap.set([headingRef.current, descRef.current], { willChange: 'opacity' });
+          gsap.set(trayRefs.current.filter(Boolean), { willChange: 'transform' });
+        },
       });
     }, wrapperRef);
 
