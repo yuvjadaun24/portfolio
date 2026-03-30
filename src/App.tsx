@@ -14,6 +14,7 @@ import ScrollingTextPinned from '@/components/sections/ScrollingTextPinned';
 import Contact from '@/components/sections/Contact';
 import Footer from '@/components/sections/Footer';
 import CaseStudy from '@/components/pages/CaseStudy';
+import { Analytics } from "@vercel/analytics/next"
 
 function HomePage() {
   const location = useLocation();
@@ -32,21 +33,24 @@ function HomePage() {
   }, []);
 
   return (
-    <SmoothScrollProvider>
-      <Navbar />
-      <main>
-        <HeroPinned />
-        <Works />
-        <WorksListTable />
-        <PhotoCluster />
-        <BigStatement />
-        <StudioInfo />
-        <WhiteToBlackTransition />
-        <ScrollingTextPinned />
-        <Contact />
-      </main>
-      <Footer />
-    </SmoothScrollProvider>
+    <>
+      <SmoothScrollProvider>
+        <Navbar />
+        <main>
+          <HeroPinned />
+          <Works />
+          <WorksListTable />
+          <PhotoCluster />
+          <BigStatement />
+          <StudioInfo />
+          <WhiteToBlackTransition />
+          <ScrollingTextPinned />
+          <Contact />
+        </main>
+        <Footer />
+      </SmoothScrollProvider>
+      <Analytics />
+    </>
   );
 }
 
