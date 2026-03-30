@@ -14,8 +14,7 @@ import ScrollingTextPinned from '@/components/sections/ScrollingTextPinned';
 import Contact from '@/components/sections/Contact';
 import Footer from '@/components/sections/Footer';
 import CaseStudy from '@/components/pages/CaseStudy';
-import { Analytics } from "@vercel/analytics/next"
-
+import { Analytics } from "@vercel/analytics/react"
 function HomePage() {
   const location = useLocation();
 
